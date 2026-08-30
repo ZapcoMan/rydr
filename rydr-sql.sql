@@ -2110,4 +2110,21 @@ CREATE TABLE `tbl_order_lock` (
   KEY `INX_DRIVER` (`driver_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='order grab lock table';
 
+-- ----------------------------
+-- Table structure for tbl_order_rule_price_tag
+-- Used by service-valuation: com.rydr.mapper.OrderRulePriceTagMapper
+-- ----------------------------
+DROP TABLE IF EXISTS `tbl_order_rule_price_tag`;
+CREATE TABLE `tbl_order_rule_price_tag` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `order_id` int(10) NOT NULL COMMENT 'order ID',
+  `category` varchar(1) NOT NULL COMMENT 'price type: 0 estimated, 1 actual',
+  `tag_name` varchar(64) NOT NULL COMMENT 'fee item name',
+  `tag_price` decimal(10,2) NOT NULL DEFAULT '0.00' COMMENT 'fee item amount',
+  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'create_time',
+  `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'update_time',
+  PRIMARY KEY (`id`),
+  KEY `idx_order_id` (`order_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='billing detail fee item table';
+
 
