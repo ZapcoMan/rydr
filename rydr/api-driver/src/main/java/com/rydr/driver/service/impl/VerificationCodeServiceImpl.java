@@ -1,7 +1,7 @@
 package com.rydr.driver.service.impl;
 
 import com.rydr.common.constant.IdentityConstant;
-import net.sf.json.JSONObject;
+import com.rydr.common.util.JsonUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -14,7 +14,7 @@ import com.rydr.dto.ResponseResult;
 import com.rydr.common.dto.verificationcode.VerifyCodeResponse;
 import com.rydr.driver.service.VerificationCodeService;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 /**
  * @author oi
  */
@@ -31,9 +31,8 @@ public class VerificationCodeServiceImpl implements VerificationCodeService {
 		String url = "http://"+SERVICE_VERIFICATION_CODE_SERVICE+"/verify-code/generate/"+ IdentityConstant.DRIVER+ "/" +phoneNumber;
 		ResponseResult result = restTemplate.exchange(url, HttpMethod.GET,new HttpEntity<Object>(null,null),ResponseResult.class).getBody();
 
-		if(result.getCode()==1) {
-			JSONObject data = JSONObject.fromObject(result.getData().toString());
-			VerifyCodeResponse response = (VerifyCodeResponse)JSONObject.toBean(data,VerifyCodeResponse.class);
+		if(result.getCode()==0) {
+			VerifyCodeResponse response = JsonUtil.toBean(result.getData(), VerifyCodeResponse.class);
 			return response.getCode();
 		}else {
 			return "";

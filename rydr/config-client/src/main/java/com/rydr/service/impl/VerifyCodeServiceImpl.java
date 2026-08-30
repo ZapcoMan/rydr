@@ -6,7 +6,7 @@ import com.rydr.dto.ResponseResult;
 import com.rydr.common.dto.verificationcode.VerifyCodeResponse;
 import com.rydr.constant.VerifyCodeConstant;
 import com.rydr.service.VerifyCodeService;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.BoundValueOperations;
 import org.springframework.data.redis.core.RedisTemplate;

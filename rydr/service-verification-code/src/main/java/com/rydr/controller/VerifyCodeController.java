@@ -1,8 +1,8 @@
 package com.rydr.controller;
 
+import com.rydr.common.util.JsonUtil;
 import com.rydr.service.VerifyCodeService;
 import lombok.extern.slf4j.Slf4j;
-import net.sf.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -40,7 +40,7 @@ public class VerifyCodeController {
 
 	@PostMapping("/verify")
 	public ResponseResult verify(@RequestBody CodeVerifyRequest request) {
-		log.info("/verify-code/verify  request:"+ JSONObject.fromObject(request));
+		log.info("/verify-code/verify  request:"+ JsonUtil.toJson(request));
 		// Get phone number and verification code
 		String phoneNumber = request.getPhoneNumber();
 		int identity = request.getIdentity();
