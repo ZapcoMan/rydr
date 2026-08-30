@@ -10,13 +10,14 @@ spring:
     port: ${REDIS_PORT:6379}
     timeout: 2000
 
-  # Zipkin distributed tracing
-  zipkin:
-    base-url: ${ZIPKIN_URL:http://localhost:9411/}
-    # Sampling rate: 1 = 100%, 0.1 = 10%
-  sleuth:
-    sampler:
-      rate: 1
+  # Distributed tracing: Sleuth/Zipkin removed in Spring Cloud 2025.x
+  cloud:
+    # LoadBalancer eager loading (replaces ribbon.eager-load)
+    loadbalancer:
+      eager-load:
+        clients:
+        - SERVICE-SMS
+        - SERVICE-VERIFICATION-CODE
 # Service registry
 eureka:
   client:
@@ -25,36 +26,8 @@ eureka:
       defaultZone: http://${EUREKA_USER:admin}:${EUREKA_PASSWORD:changeme}@${EUREKA_HOST:eureka-7900}:7900/eureka/
     enabled: false
 
-# Custom Ribbon load balancing (commented out)
-#service-sms:
-#  ribbon:
-#    NFLoadBalancerRuleClassName: com.netflix.loadbalancer.RandomRule
-#    eureka:
-#      enable: false
-#    listOfServers: localhost:8004,localhost:8005
-
-# Standard Ribbon load balancing (commented out)
-#SERVICE-SMS:
-#  ribbon:
-#    NFLoadBalancerRuleClassName: com.netflix.loadbalancer.RandomRule
-#    # Custom load balancing strategy
-#    NFLoadBalancerRuleClassName: com.rydr.driver.ribbonconfig.MsbRandomRule
-
-#service-valuation:
-#  ribbon:
-#    NFLoadBalancerRuleClassName: com.netflix.loadbalancer.RandomRule
-
-ribbon:
-  eager-load:
-    enabled: true
-    clients:
-    - SERVICE-SMS
-    - SERVICE-VERIFICATION-CODE
-#  http:
-#    client:
-#      enabled: false
-#  okhttp:
-#    enabled: false
+# Ribbon configuration removed: Netflix Ribbon was replaced by Spring Cloud LoadBalancer
+# Use spring.cloud.loadbalancer.* instead
 
 # Admin monitoring
 management:
@@ -75,13 +48,17 @@ logging:
 
 ---
 spring:
-  profiles: 9002
+  config:
+    activate:
+      on-profile: 9002
 # Service port
 server:
   port: 9002
 ---
 spring:
-  profiles: 9003
+  config:
+    activate:
+      on-profile: 9003
 # Service port
 server:
   port: 9003

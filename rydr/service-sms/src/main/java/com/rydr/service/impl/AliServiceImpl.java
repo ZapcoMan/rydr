@@ -17,10 +17,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 
+import com.rydr.common.util.JsonUtil;
 import com.rydr.service.AliService;
 
 import lombok.extern.slf4j.Slf4j;
-import net.sf.json.JSONObject;
 /**
  * @author oi
  */
@@ -93,10 +93,7 @@ public class AliServiceImpl implements AliService {
     }
 
     private int send(String phoneNumber, String templateId, Map<String, ?> map) throws Exception {
-        JSONObject param = new JSONObject();
-        param.putAll(map);
-
-        return sendMsg(phoneNumber, templateId, param.toString());
+        return sendMsg(phoneNumber, templateId, JsonUtil.toJson(map));
     }
 
     private int sendMsg(String phoneNumber, String templateCode, String param) {
