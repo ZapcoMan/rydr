@@ -7,7 +7,7 @@ import org.springframework.jms.annotation.EnableJms;
 /**
  * @author oi
  */
-//@EnableEurekaClient
+//@EnableDiscoveryClient
 @SpringBootApplication
 @EnableJms
 public class ServiceJmsConsumerApplication {
