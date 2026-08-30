@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>rydr WebSocket demo</title>
+</head>
+<body>
+<h3>WebSocket demo</h3>
+<p>Client id: <span id="cid">-</span></p>
+<p>Message content: <span id="msg">None</span></p>
+<input type="text" id="to" value="30" placeholder="target client id">
+<input type="button" onclick="sendMsg()" value="Send">
+
+<script>
+    // Spring Boot 3 no longer renders JSP with the embedded container,
+    // so the previous socket.jsp became this static page.
+    var cid = new URLSearchParams(location.search).get('cid');
+    if (!cid) {
+        cid = Math.floor(Math.random() * 1000);
+    }
+    document.getElementById('cid').innerText = cid;
+
+    var socket;
+    if (typeof (WebSocket) === "undefined") {
+        console.log("Your browser does not support WebSocket");
+    } else {
+        // Derive the ws(s) endpoint from the current page location
+        var scheme = location.protocol === "https:" ? "wss://" : "ws://";
+        socket = new WebSocket(scheme + location.host + "/websocket/" + cid);
+
+        socket.onopen = function () {
+            console.log("Socket is open");
+        };
+        socket.onmessage = function (msg) {
+            console.log(msg.data);
+            document.getElementById('msg').innerText = msg.data;
+        };
+        socket.onclose = function () {
+            console.log("Socket is closed");
+        };
+        socket.onerror = function () {
+            alert("Socket encountered an error");
+        };
+    }
+
+    function sendMsg() {
+        if (!socket) {
+            return;
+        }
+        var to = document.getElementById('to').value;
+        socket.send(JSON.stringify({to: to, data: {}}));
+    }
+</script>
+</body>
+</html>
