@@ -1,0 +1,15 @@
+Demo Application
+
+Open two pages:
+http://localhost:8083/message/socket/2
+http://localhost:8083/message/socket/1
+
+Push data to frontend:
+http://localhost:8083/message/socket/push/1?message=1msg
+http://localhost:8083/message/socket/push/2?message=2msg
+http://localhost:8083/message/socket/pushAll?message=allmsg
+
+Updated URLs:
+(Use Edge browser to access)
+Passenger client: http://localhost:8083/index.html#/user
+Driver client: http://localhost:8083/index.html#/driver

@@ -1,0 +1,45 @@
+# Service port
+server:
+  port: 8005
+
+# Application name and configuration
+spring:
+  application:
+    name: service-order-dispatch
+
+# Service registry
+eureka:
+#  server:
+#    enable-self-preservation: false       # Disable self-preservation
+#    eviction-interval-timer-in-ms: 2000   # Eviction interval in milliseconds
+  client:
+    # Set service registry URL
+    service-url:
+      defaultZone: http://${EUREKA_USER:admin}:${EUREKA_PASSWORD:changeme}@${EUREKA_HOST:eureka-7900}:7900/eureka/
+  instance:
+    # Heartbeat interval in seconds
+    lease-renewal-interval-in-seconds: 1
+    # Service expiration time - instance removed if no heartbeat received within this period
+    lease-expiration-duration-in-seconds: 1
+    hostname: localhost
+    prefer-ip-address: true
+    # Eureka registry info URL
+    status-page-url: /actuator/info
+    # Health check URL
+    health-check-url-path: /actuator/health
+    instance-id: service-order-dispatch
+    metadata-map:
+      user.name: ${EUREKA_USER:admin}
+      user.password: ${EUREKA_PASSWORD:changeme}
+
+# Admin monitoring
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: ALWAYS
+
+logging:  level:    org.springframework: debug

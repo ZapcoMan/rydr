@@ -1,0 +1,50 @@
+# Service port
+server:
+  port: 5002
+
+# Application name and configuration
+spring:
+  application:
+    name: service-jms-consumer
+  activemq:
+    broker-url: tcp://${ACTIVEMQ_HOST:127.0.0.1}:${ACTIVEMQ_PORT:61616}
+    user: ${ACTIVEMQ_USER:admin}
+    password: ${ACTIVEMQ_PASSWORD:changeme}
+    pool:
+      enabled: true
+      max-connections: 100
+#  jms:
+#    pub-sub-domain: true
+
+
+# Service registry (commented out)
+#eureka:
+#  client:
+#    # Set service registry URL
+#    service-url:
+#      defaultZone: http://${EUREKA_USER:admin}:${EUREKA_PASSWORD:changeme}@${EUREKA_HOST:eureka-7901}:7901/eureka/
+#  instance:
+#    # Heartbeat interval in seconds
+#    lease-renewal-interval-in-seconds: 1
+#    # Service expiration time - instance removed if no heartbeat received within this period
+#    lease-expiration-duration-in-seconds: 1
+#    hostname: localhost
+#    prefer-ip-address: true
+#    # Eureka registry info URL
+#    status-page-url: /actuator/info
+#    # Health check URL
+#    health-check-url-path: /actuator/health
+#    instance-id: service-jms-consumer
+#    metadata-map:
+#      user.name: ${EUREKA_USER:admin}
+#      user.password: ${EUREKA_PASSWORD:changeme}
+
+# Admin monitoring
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: ALWAYS

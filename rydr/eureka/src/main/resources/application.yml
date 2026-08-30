@@ -1,0 +1,30 @@
+# Single node configuration
+# Application name and authentication
+spring:
+  application:
+    name: eureka
+  security:
+    user:
+      name: ${EUREKA_USER:admin}
+      password: ${EUREKA_PASSWORD:changeme}
+eureka:
+  client:
+    register-with-eureka: false
+    fetch-registry: false
+  server:
+    # Disable self-preservation
+    enable-self-preservation: false
+    # Cleanup interval time
+    eviction-interval-timer-in-ms: 5000
+logging:
+  level:
+    root: info
+---
+spring:
+  profiles: 7900
+server:
+  port: 7900
+eureka:
+  client:
+    service-url:
+      defaultZone: http://${EUREKA_USER:admin}:${EUREKA_PASSWORD:changeme}@localhost:7900/eureka/

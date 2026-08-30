@@ -1,0 +1,44 @@
+# Single-node service registry
+
+# Service port
+server:
+  port: 8084
+
+# Application name and authentication
+spring:
+  application:
+    name: api-listen-order
+  # Whether to register service with server, default true
+  cloud:    service-registry:      auto-registration:        enabled: true
+
+# Service registry
+eureka:
+  client:
+    enabled: false
+    healthcheck:      enabled: true
+    # Set service registry URL
+    service-url:
+      defaultZone: http://${EUREKA_USER:admin}:${EUREKA_PASSWORD:changeme}@localhost:7900/eureka/
+  instance:
+    # Heartbeat interval in seconds
+    lease-renewal-interval-in-seconds: 1
+    # Service expiration time - instance removed if no heartbeat received within this period
+    lease-expiration-duration-in-seconds: 1
+    hostname: localhost
+    # true: register IP address with Eureka Server; false: register OS hostname
+    prefer-ip-address: true
+    ip-address: 127.0.0.1
+    instance-id: ${spring.application.name}:${spring.cloud.client.ip-address}:${server:port}
+    metadata-map:
+      user.name: ${EUREKA_USER:admin}
+      user.password: ${EUREKA_PASSWORD:changeme}
+
+# Admin monitoring
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: ALWAYS

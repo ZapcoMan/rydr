@@ -1,0 +1,35 @@
+# Service port
+server:
+  port: 8011
+# Application name (config file name pattern: service-verification-code-{profile}.yml)
+spring:
+  application:
+    name: service-verification-code
+#  rabbitmq:
+#    host: ${RABBITMQ_HOST:localhost}
+#    port: ${RABBITMQ_PORT:5672}
+#    username: ${RABBITMQ_USER:guest}
+#    password: ${RABBITMQ_PASSWORD:guest}
+
+eureka:
+  client:
+    # Set service registry URL
+    service-url:
+      defaultZone: http://${EUREKA_USER:admin}:${EUREKA_PASSWORD:changeme}@${EUREKA_HOST:eureka-7900}:7900/eureka/
+    enabled: true
+  instance:
+    # Heartbeat interval in seconds
+    lease-renewal-interval-in-seconds: 1
+    # Service expiration time - instance removed if no heartbeat received within this period
+    lease-expiration-duration-in-seconds: 1
+#    hostname: service-verification-code
+#    instance-id: service-verification-code
+
+management:
+  endpoints:
+    web:
+      exposure:
+        # In YAML use double quotes; in properties files quotes are not needed
+        include: "*"
+
+env: NaN

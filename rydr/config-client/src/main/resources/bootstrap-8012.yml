@@ -1,0 +1,44 @@
+#Service port
+server:
+  port: 8012
+#Application name, config file name, currently: config-client-dev.yml
+spring:
+  application:
+    name: config-client
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: ${MQ_PASSWORD:guest}
+
+#Config center (previously commented out)
+  cloud:
+    config:
+      discovery:
+        # Use config server from discovery instead of specifying URI directly, default is false.
+        enabled: true
+        service-id: config-server
+      profile: dev
+      label: master
+#Registry center - used here to locate config-server
+eureka:
+  client:
+    #Set the URL of the service registry
+    service-url:
+      defaultZone: http://${EUREKA_USER:admin}:${EUREKA_PASSWORD:admin}@eureka-7900:7900/eureka/
+  instance:
+    #Service refresh interval, heartbeat is sent at this interval
+    lease-renewal-interval-in-seconds: 1
+    #Service expiration timeout, if no heartbeat is received within this time, Eureka Server will remove this instance
+    lease-expiration-duration-in-seconds: 1
+    hostname: localhost
+    instance-id: config-client:${server.port}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        #In yml use double quotes, in properties no quotes needed
+        include: "*"
+
+env: NaN

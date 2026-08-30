@@ -1,0 +1,43 @@
+# Service port
+server:
+  port: 8006
+
+# Application name and configuration
+spring:
+  application:
+    name: service-wallet
+
+# Service registry
+eureka:
+#  server:
+#    enable-self-preservation: false       # Disable self-preservation
+#    eviction-interval-timer-in-ms: 2000   # Eviction interval in milliseconds
+  client:
+    # Set service registry URL
+    service-url:
+      defaultZone: http://${EUREKA_USER:admin}:${EUREKA_PASSWORD:changeme}@${EUREKA_HOST:eureka-7901}:7901/eureka/
+  instance:
+    # Heartbeat interval in seconds
+    lease-renewal-interval-in-seconds: 1
+    # Service expiration time - instance removed if no heartbeat received within this period
+    lease-expiration-duration-in-seconds: 1
+    hostname: localhost
+    prefer-ip-address: true
+    # Eureka registry info URL
+    status-page-url: /actuator/info
+    # Health check URL
+    health-check-url-path: /actuator/health
+    instance-id: service-wallet
+    metadata-map:
+      user.name: ${EUREKA_USER:admin}
+      user.password: ${EUREKA_PASSWORD:changeme}
+
+# Admin monitoring
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: ALWAYS

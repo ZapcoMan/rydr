@@ -1,0 +1,44 @@
+# Service port
+server:  port: 80
+# Application name (config file name pattern: service-verification-code-{profile}.yml)
+spring:
+  application:
+    name: config-client
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+
+# Config center (commented out direct URI, using discovery instead)
+  cloud:
+    config:
+    # Mutually exclusive with discovery below
+#      uri:#      - http://localhost:6001
+      discovery:
+        enabled: true
+        service-id: config-server
+      profile: dev
+      label: master
+# Service registry - used to locate config-server
+eureka:
+  client:
+    # Set service registry URL
+    service-url:
+      defaultZone: http://${EUREKA_USER:admin}:${EUREKA_PASSWORD:changeme}@${EUREKA_HOST:eureka-7900}:7900/eureka/
+  instance:
+    # Heartbeat interval in seconds
+    lease-renewal-interval-in-seconds: 1
+    # Service expiration time - instance removed if no heartbeat received within this period
+    lease-expiration-duration-in-seconds: 1
+    hostname: localhost
+    instance-id: config-client
+
+management:
+  endpoints:
+    web:
+      exposure:
+        # In YAML use double quotes; in properties files quotes are not needed
+        include: "*"
+
+env: NaN
