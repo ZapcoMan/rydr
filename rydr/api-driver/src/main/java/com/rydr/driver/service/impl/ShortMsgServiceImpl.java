@@ -17,8 +17,9 @@ import com.rydr.dto.ResponseResult;
 import com.rydr.driver.service.RestTemplateRequestService;
 import com.rydr.driver.service.ShortMsgService;
 
+import com.rydr.common.util.JsonUtil;
+
 import lombok.extern.slf4j.Slf4j;
-import net.sf.json.JSONObject;
 /**
  * @author oi
  */
@@ -56,7 +57,7 @@ public class ShortMsgServiceImpl implements ShortMsgService {
 //		 Normal ribbon call
 		ResponseResult result =  restTemplateRequestService.smsSend(smsSendRequest);
 
-		System.out.println("Result returned from SMS service call: "+JSONObject.fromObject(result));
+		System.out.println("Result returned from SMS service call: "+JsonUtil.toJson(result));
 		return result;
 	}
 

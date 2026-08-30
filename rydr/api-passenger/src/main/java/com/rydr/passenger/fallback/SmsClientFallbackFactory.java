@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 import com.rydr.dto.ResponseResult;
 import com.rydr.passenger.feign.SmsClient;
 
-import feign.hystrix.FallbackFactory;
+import org.springframework.cloud.openfeign.FallbackFactory;
 
 @Component
 public class SmsClientFallbackFactory implements FallbackFactory<SmsClient> {

@@ -13,7 +13,7 @@ import com.rydr.dto.ResponseResult;
 import com.rydr.passenger.feign.SmsClient;
 import com.rydr.passenger.service.ShortMsgService;
 
-import net.sf.json.JSONObject;
+import com.rydr.common.util.JsonUtil;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -55,7 +55,7 @@ public class ShortMsgServiceImpl implements ShortMsgService {
             throw new RuntimeException("feign exception");
         }
 
-        System.out.println("Result returned from SMS service call: "+JSONObject.fromObject(result));
+        System.out.println("Result returned from SMS service call: "+JsonUtil.toJson(result));
 		return result;
 	}
 
