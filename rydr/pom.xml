@@ -154,15 +154,27 @@
     </dependencies>
 
     <build>
-        <pluginManagement>
-            <plugins>
-                <!-- Version managed by spring-boot-starter-parent; enabled per-module that needs repackage -->
-                <plugin>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-maven-plugin</artifactId>
-                </plugin>
-            </plugins>
-        </pluginManagement>
+        <plugins>
+            <!--
+                Produces executable (fat) jars for every Spring Boot application module.
+                The repackage execution must be declared here: declaring the plugin only in
+                <pluginManagement> without an execution silently disables repackaging and
+                yields jars without a Main-Class manifest entry.
+                Library-only modules (rydr-common) opt out via spring-boot.repackage.skip.
+            -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>repackage</id>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
     </build>
 
 </project>

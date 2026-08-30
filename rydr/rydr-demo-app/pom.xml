@@ -55,10 +55,12 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-thymeleaf</artifactId>
-		</dependency>
+
+		<!--
+			spring-boot-starter-thymeleaf removed: this module serves a static HTML page
+			(static/socket.html) and has no template views. Keeping it only produced a
+			"Cannot find template location" warning at startup.
+		-->
 
 	</dependencies>
 	<!-- +++++++++++++++++++++++++++++++Dependencies - End+++++++++++++++++++++++++++++++ -->

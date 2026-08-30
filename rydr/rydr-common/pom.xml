@@ -16,7 +16,11 @@
 	<version>0.0.1-SNAPSHOT</version>
 
 	<properties>
-		<start-class>com.rydr.RydrCommonApplication</start-class>
+		<!--
+			rydr-common is a shared library module: it has no main class, so the
+			Spring Boot repackage goal must be skipped for it.
+		-->
+		<spring-boot.repackage.skip>true</spring-boot.repackage.skip>
 	</properties>
 
 	<dependencies>
