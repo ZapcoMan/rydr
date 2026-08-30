@@ -49,3 +49,6 @@ logs/
 # Spring Boot
 spring-boot-devtools.properties
 /.codebuddy/
+*/*.log
+*/*.txt
+*.txt
