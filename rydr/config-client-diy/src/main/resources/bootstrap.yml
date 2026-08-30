@@ -9,15 +9,18 @@ spring:
     port: ${RABBITMQ_PORT:5672}
     username: ${RABBITMQ_USER:guest}
     password: ${RABBITMQ_PASSWORD:guest}
-  cloud:    stream:
+  cloud:
+    stream:
       default-binder: rabbit
-      bindings:         input:
+      # Functional binding: bean name "input" -> binding name "input-in-0"
+      bindings:
+        input-in-0:
           # Exchange name
           destination: stream-des-exchange
-        output:
+          group: stream-des-group
+        output-out-0:
           # Exchange name
           destination: stream-des-exchange
-
 
 # Service registry - used to locate config-server
 eureka:
@@ -26,7 +29,8 @@ eureka:
     enabled: false
     # Set service registry URL
     service-url:
-      defaultZone: http://${EUREKA_USER:admin}:${EUREKA_PASSWORD:changeme}@${EUREKA_HOST:eureka-7900}:7900/eureka/  instance:
+      defaultZone: http://${EUREKA_USER:admin}:${EUREKA_PASSWORD:changeme}@${EUREKA_HOST:eureka-7900}:7900/eureka/
+  instance:
     # Heartbeat interval in seconds
     lease-renewal-interval-in-seconds: 1
     # Service expiration time - instance removed if no heartbeat received within this period
@@ -43,9 +47,9 @@ management:
 
 env: NaN
 ---
-spring:  profiles: 80server:  port: 80
----
 spring:
-  profiles: 81
+  config:
+    activate:
+      on-profile: 81
 server:
   port: 81

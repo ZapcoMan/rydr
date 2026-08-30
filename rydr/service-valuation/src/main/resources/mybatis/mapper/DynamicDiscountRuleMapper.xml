@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.rydr.mapper.DynamicDiscountRuleMapper" >
+
+  <!--
+    Find the applicable dynamic discount: match the rule by city, service type, vehicle level,
+    validity period, date type (weekday / special date) and time period, then pick the largest
+    mileage tier that does not exceed the total trip distance.
+  -->
+  <select id="findDiscountByCondition" resultType="com.rydr.dto.valuation.discount.DiscountPrice"
+          parameterType="com.rydr.dto.valuation.discount.DiscountCondition" >
+    select
+      r.discount_max_price as discountMaxPrice,
+      i.discount as discount
+    from tbl_dynamic_discount_rule r
+      inner join tbl_dynamic_discount_city c
+        on c.dynamic_discount_rule_id = r.id and c.is_delete = 0
+      inner join tbl_dynamic_discount_info i
+        on i.dynamic_discount_rule_id = r.id and i.is_delete = 0
+    where r.is_unuse = 0
+      and c.city_code = #{cityCode,jdbcType=VARCHAR}
+      and r.service_type = #{serviceTypeId,jdbcType=VARCHAR}
+      and r.car_level = #{carLevelId,jdbcType=VARCHAR}
+      and r.valid_start_time &lt;= now()
+      and r.valid_end_time &gt;= now()
+      and (
+        (r.date_type = 1 and r.week_set like concat('%', #{startWeekDay,jdbcType=INTEGER}, '%'))
+        or (r.date_type = 2 and r.special_date_set like concat('%', #{startDate,jdbcType=VARCHAR}, '%'))
+      )
+      and r.time_set like concat('%', #{startHour,jdbcType=INTEGER}, '%')
+      and i.km &lt;= #{totalDistance,jdbcType=DOUBLE}
+    order by i.km desc
+    limit 1
+  </select>
+
+</mapper>

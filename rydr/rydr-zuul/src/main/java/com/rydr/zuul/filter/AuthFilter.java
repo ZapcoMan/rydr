@@ -1,89 +1,69 @@
 package com.rydr.zuul.filter;
 
-import javax.servlet.http.HttpServletRequest;
+import java.nio.charset.StandardCharsets;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.cloud.gateway.filter.GatewayFilterChain;
+import org.springframework.cloud.gateway.filter.GlobalFilter;
+import org.springframework.core.Ordered;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.stereotype.Component;
+import org.springframework.web.server.ServerWebExchange;
 
 import com.rydr.common.util.JwtUtil;
-import org.apache.commons.lang.StringUtils;
-import org.springframework.cloud.netflix.zuul.filters.support.FilterConstants;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Component;
 
-import com.netflix.zuul.ZuulFilter;
-import com.netflix.zuul.context.RequestContext;
-import com.netflix.zuul.exception.ZuulException;
+import reactor.core.publisher.Mono;
+
 /**
- * Authentication filter
+ * Authentication filter (Spring Cloud Gateway version of the previous Zuul filter).
+ *
  * @author oi
  */
 @Component
-public class AuthFilter extends ZuulFilter {
+public class AuthFilter implements GlobalFilter, Ordered {
 
 	/**
-	 * 	Whether this filter is active
+	 * Only this endpoint will require authentication
 	 */
-	@Override
-	public boolean shouldFilter() {
-		// Get the context
-		RequestContext requestContext = RequestContext.getCurrentContext();
-		HttpServletRequest request = requestContext.getRequest();
+	private static final String CHECK_URI = "/api-passenger/api-passenger-gateway-test/hello";
 
-		String uri = request.getRequestURI();
-		System.out.println("Source uri: "+uri);
-		// Only this endpoint /api-passenger/api-passenger-gateway-test/hello will be intercepted
-		String checkUri = "/api-passenger/api-passenger-gateway-test/hello";
-		if(checkUri.equalsIgnoreCase(uri)) {
-			return true;
+	@Override
+	public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+		ServerHttpRequest request = exchange.getRequest();
+		String uri = request.getURI().getPath();
+		System.out.println("Source uri: " + uri);
+
+		// Only the configured endpoint is intercepted
+		if (!CHECK_URI.equalsIgnoreCase(uri)) {
+			return chain.filter(exchange);
 		}
-		// Test path
-//		if(uri.contains("api-driver")) {
-//			return true;
-//		}
 
-		return false;
-	}
-
-	/**
-	 * 	Specific business logic after interception
-	 */
-	@Override
-	public Object run() throws ZuulException {
 		System.out.println("auth intercepted");
-		// Get the context (important, spans all filters, contains all parameters)
-		RequestContext requestContext = RequestContext.getCurrentContext();
-		HttpServletRequest request = requestContext.getRequest();
+		String token = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
+		String parseToken = JwtUtil.parseToken(token);
 
-		String token = request.getHeader("Authorization");
-		// If token is 1234, pass
-		String defaultToken = "1234";
-
-        String parseToken = JwtUtil.parseToken(token);
-
-        if(StringUtils.isNotBlank(parseToken)) {
+		if (StringUtils.isNotBlank(parseToken)) {
 			System.out.println("auth filter: verification passed");
-			requestContext.setSendZuulResponse(true);
-		} else {
-			// Stop forwarding to downstream filters
-			requestContext.setSendZuulResponse(false);
-			requestContext.setResponseStatusCode(HttpStatus.UNAUTHORIZED.value());
-			requestContext.setResponseBody("Authentication failed");
+			return chain.filter(exchange);
 		}
-		return null;
-	}
-	/**
-	 * Interception type, 4 types available.
-	 */
-	@Override
-	public String filterType() {
-		// TODO Auto-generated method stub
-		return FilterConstants.PRE_TYPE;
+
+		// Authentication failed: stop the request instead of forwarding it downstream
+		ServerHttpResponse response = exchange.getResponse();
+		response.setStatusCode(HttpStatus.UNAUTHORIZED);
+		DataBuffer buffer = response.bufferFactory()
+				.wrap("Authentication failed".getBytes(StandardCharsets.UTF_8));
+		return response.writeWith(Mono.just(buffer));
 	}
 
 	/**
-	 * 	The smaller the value, the higher the priority
+	 * The smaller the value, the higher the priority
 	 */
 	@Override
-	public int filterOrder() {
-		// TODO Auto-generated method stub
+	public int getOrder() {
 		return 4;
 	}
 

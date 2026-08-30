@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.ValidationException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ValidationException;
 
 import java.util.List;
 
@@ -28,7 +28,7 @@ public class BindExceptionHanlder {
             case "org.springframework.validation.BindException":
                 BindException bindException = (BindException) exception;
                 message = bindException.getFieldError().getDefaultMessage();
-            case "javax.validation.ValidationException":
+            case "jakarta.validation.ValidationException":
                 ValidationException validationException = (ValidationException) exception;
                 message = validationException.getMessage();
 
