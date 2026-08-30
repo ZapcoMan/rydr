@@ -46,9 +46,8 @@ public class VerifyCodeServiceImpl implements VerifyCodeService {
         String key = keyPre + phoneNumber;
         // Store in Redis, expires in 2 minutes
         BoundValueOperations<String, String> codeRedis = redisTemplate.boundValueOps(key);
-        // This should ideally be an atomic operation, not separated.
-//        codeRedis.set(code,120, TimeUnit.SECONDS);
-        codeRedis.set(code,120, TimeUnit.MINUTES);
+        // Expires in 2 minutes
+        codeRedis.set(code,120, TimeUnit.SECONDS);
 
         // Return result
         VerifyCodeResponse result = new VerifyCodeResponse();

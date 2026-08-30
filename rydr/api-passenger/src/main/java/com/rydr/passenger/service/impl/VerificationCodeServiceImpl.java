@@ -31,7 +31,7 @@ public class VerificationCodeServiceImpl implements VerificationCodeService {
 		String url = "http://"+SERVICE_VERIFICATION_CODE_SERVICE+"/verify-code/generate/"+ IdentityConstant.PASSENGER+ "/" +phoneNumber;
 		ResponseResult result = restTemplate.exchange(url, HttpMethod.GET,new HttpEntity<Object>(null,null),ResponseResult.class).getBody();
 
-		if(result.getCode()==1) {
+		if(result.getCode()==0) {
 			JSONObject data = JSONObject.fromObject(result.getData().toString());
 			VerifyCodeResponse response = (VerifyCodeResponse)JSONObject.toBean(data,VerifyCodeResponse.class);
 			return response.getCode();

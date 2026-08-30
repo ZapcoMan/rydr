@@ -42,7 +42,7 @@ public class GrabRedisRedissonRedLockLockServiceImpl implements GrabService {
         //red lock
         RLock rLock1 = redissonRed1.getLock(lockKey);
         RLock rLock2 = redissonRed2.getLock(lockKey);
-        RLock rLock3 = redissonRed2.getLock(lockKey);
+        RLock rLock3 = redissonRed3.getLock(lockKey);
         RedissonRedLock rLock = new RedissonRedLock(rLock1,rLock2,rLock3);
 
         rLock.lock();

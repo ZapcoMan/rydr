@@ -6,6 +6,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.netflix.zuul.filters.support.FilterConstants;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -20,14 +21,19 @@ import com.netflix.zuul.exception.ZuulException;
 @Component
 public class RequestCheckFilter extends ZuulFilter {
 
-	private String secret = "${ZUUL_SECRET:default-secret}";
+	@Value("${ZUUL_SECRET:default-secret}")
+	private String secret;
 
 	/**
-	 * 	Whether this filter is active
+	 * 	Whether this filter is active - only intercept requests that carry signature headers
 	 */
 	@Override
 	public boolean shouldFilter() {
-		return true;
+		RequestContext requestContext = RequestContext.getCurrentContext();
+		HttpServletRequest request = requestContext.getRequest();
+		// Only requests with timestamp/sign headers are validated; others are passed through
+		return StringUtils.isNotBlank(request.getHeader("timestamp"))
+				|| StringUtils.isNotBlank(request.getHeader("sign"));
 	}
 
 	/**
@@ -40,19 +46,26 @@ public class RequestCheckFilter extends ZuulFilter {
 		RequestContext requestContext = RequestContext.getCurrentContext();
 		HttpServletRequest request = requestContext.getRequest();
 
-		Long timestamp = Long.valueOf(request.getHeader("timestamp"));
+		String timestampStr = request.getHeader("timestamp");
 		String token = request.getHeader("token");
 		String sign = request.getHeader("sign");
 
-		String localSign = DigestUtils.sha1Hex(token + timestamp + secret);
 		boolean flag = true;
-		// Check if the timestamp is within 1 second
-		Long now = Calendar.getInstance().getTimeInMillis();
-		if(!(flag && (now - timestamp < 1 * 1000))) {
+		Long timestamp = null;
+		try {
+			timestamp = Long.valueOf(timestampStr);
+		} catch (NumberFormatException e) {
 			flag = false;
 		}
 
-		if(!(flag && (localSign.trim().equals(sign)))) {
+		String localSign = DigestUtils.sha1Hex(token + timestamp + secret);
+		// Check if the timestamp is within 1 second
+		Long now = Calendar.getInstance().getTimeInMillis();
+		if(flag && !(now - timestamp < 1 * 1000)) {
+			flag = false;
+		}
+
+		if(flag && !(localSign.trim().equals(sign))) {
 			flag = false;
 		}
 

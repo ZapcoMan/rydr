@@ -32,9 +32,9 @@ public class VerifyCodeServiceTest {
         String msgCode = "";
         ResponseResult generateResult = verifyCodeService.generate(1,phoneNumber);
         int code = generateResult.getCode();
-        Assert.assertEquals(1,code);
+        Assert.assertEquals(0,code);
 
-        if (code == 1){
+        if (code == 0){
             VerifyCodeResponse data = (VerifyCodeResponse)generateResult.getData();
             msgCode = data.getCode();
         }
@@ -51,6 +51,6 @@ public class VerifyCodeServiceTest {
         ResponseResult result = verifyCodeService.verify(1,phoneNumber,msgCode);
         int code = result.getCode();
 
-        Assert.assertEquals(1,code);
+        Assert.assertEquals(0,code);
     }
 }

@@ -2061,3 +2061,53 @@ CREATE TABLE `tbl_weixinpay_callback_info` (
   KEY `INX_OUT_NO` (`out_trade_no`)
 ) ENGINE=InnoDB AUTO_INCREMENT=70 DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='WeChat payment info table';
 
+DROP TABLE IF EXISTS `passenger_user_info`;
+CREATE TABLE `passenger_user_info` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'passenger user ID',
+  `register_date` timestamp NULL DEFAULT NULL COMMENT 'registration date',
+  `passenger_phone` varchar(20) COLLATE utf8_unicode_ci NOT NULL DEFAULT '' COMMENT 'passenger phone number',
+  `passenger_name` varchar(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT '' COMMENT 'passenger name',
+  `passenger_gender` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'passenger gender: 1 male, 2 female',
+  `user_state` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'user state: 0 disabled, 1 enabled',
+  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'creation time',
+  `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'update time',
+  PRIMARY KEY (`id`),
+  KEY `INX_PHONE` (`passenger_phone`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='passenger user info table';
+
+DROP TABLE IF EXISTS `service_sms_record`;
+CREATE TABLE `service_sms_record` (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'record ID',
+  `phone_number` varchar(20) COLLATE utf8_unicode_ci NOT NULL DEFAULT '' COMMENT 'receiver phone number',
+  `sms_content` varchar(255) COLLATE utf8_unicode_ci NOT NULL DEFAULT '' COMMENT 'SMS content',
+  `send_time` timestamp NULL DEFAULT NULL COMMENT 'send time',
+  `operator_name` varchar(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '' COMMENT 'operator',
+  `send_flag` int(2) NOT NULL DEFAULT '0' COMMENT 'send flag: 0 unsent, 1 sent, 2 failed',
+  `send_number` int(4) NOT NULL DEFAULT '0' COMMENT 'send retry count',
+  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'creation time',
+  `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'update time',
+  PRIMARY KEY (`id`),
+  KEY `INX_PHONE` (`phone_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='SMS send record table';
+
+DROP TABLE IF EXISTS `service_sms_template`;
+CREATE TABLE `service_sms_template` (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'template ID',
+  `template_id` varchar(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT '' COMMENT 'third-party template ID',
+  `template_name` varchar(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT '' COMMENT 'template name',
+  `template_content` varchar(500) COLLATE utf8_unicode_ci NOT NULL DEFAULT '' COMMENT 'template content',
+  `template_type` bit(1) NOT NULL DEFAULT b'0' COMMENT 'template type: 0 verification code, 1 notification',
+  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'creation time',
+  `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'update time',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='SMS template table';
+
+DROP TABLE IF EXISTS `tbl_order_lock`;
+CREATE TABLE `tbl_order_lock` (
+  `order_id` int(11) NOT NULL COMMENT 'order ID',
+  `driver_id` int(11) NOT NULL DEFAULT '0' COMMENT 'driver ID',
+  PRIMARY KEY (`order_id`),
+  KEY `INX_DRIVER` (`driver_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='order grab lock table';
+
+

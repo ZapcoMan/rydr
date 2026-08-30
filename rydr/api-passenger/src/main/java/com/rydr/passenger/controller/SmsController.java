@@ -42,12 +42,10 @@ public class SmsController {
 	public ResponseResult verifyCodeSend(@RequestBody @Validated ShortMsgRequest shortMsgRequest) {
 		String phoneNumber = shortMsgRequest.getPhoneNumber();
 
-		// Get verification code - normal code
-//		String code = verificationCodeService.getCode(phoneNumber);
-		String code = "010101";
-//		log.info("Verification code returned from service-verification-code: "+code);
-//		return shortMsgService.send(phoneNumber, code);
-        return null;
+		// Get verification code from service-verification-code
+		String code = verificationCodeService.getCode(phoneNumber);
+		log.info("Verification code returned from service-verification-code: "+code);
+		return shortMsgService.send(phoneNumber, code);
 
 	}
 
