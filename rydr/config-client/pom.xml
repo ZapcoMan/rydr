@@ -13,7 +13,7 @@
 	<groupId>com.rydr</groupId>
 	<artifactId>config-client</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>verificationCode</name>
+	<name>config-client</name>
 	<description>Demo project for Spring Boot</description>
 
 	<properties>
