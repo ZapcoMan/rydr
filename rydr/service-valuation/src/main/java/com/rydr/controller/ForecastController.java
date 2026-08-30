@@ -9,9 +9,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.rydr.common.dto.order.ForecastRequest;
 import com.rydr.common.dto.order.ForecastResponse;
+import com.rydr.common.util.JsonUtil;
 
 import lombok.extern.slf4j.Slf4j;
-import net.sf.json.JSONObject;
 
 /**
  *
@@ -28,8 +28,7 @@ public class ForecastController {
 
 	@PostMapping("/single")
 	public ResponseResult forecast(@RequestBody ForecastRequest forecastRequest) {
-		JSONObject requestJson = JSONObject.fromObject(forecastRequest);
-		log.info("Valuation parameters: "+port+" "+requestJson);
+		log.info("Valuation parameters: "+port+" "+JsonUtil.toJson(forecastRequest));
 
 		ForecastResponse response = new ForecastResponse();
 
