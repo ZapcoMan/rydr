@@ -2,14 +2,20 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-	
 
+    <!-- Upgrade baseline: Spring Boot 3.5.16 (JDK 17) + Spring Cloud 2025.0.x -->
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.5.16</version>
+        <relativePath/>
+    </parent>
 
     <groupId>com.rydr</groupId>
     <artifactId>rydr-parent</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-		
-	<packaging>pom</packaging>
+
+    <packaging>pom</packaging>
     <name>rydr-parent</name>
     <description>A microservices-based ride-hailing platform built with Spring Cloud</description>
     <url>https://github.com/OiPunk/rydr</url>
@@ -31,76 +37,112 @@
             <url>https://github.com/OiPunk</url>
         </developer>
     </developers>
-	
-    <modules>
-		
-		<!-- Business layer -->
-        <module>api-driver</module>
-		<module>api-listen-order</module>
-		<module>api-passenger</module>
-		
-		<!-- Service layer -->
-		<module>service-order</module>
-		<module>service-order-dispatch</module>
-		<module>service-passenger-user</module>
-		<module>service-sms</module>
-		<module>service-valuation</module>
-		<module>service-verification-code</module>
-		<module>service-wallet</module>
 
-		<!-- Infrastructure layer -->
-		<module>eureka</module>
-		<module>rydr-config-server</module>
-		<module>rydr-zuul</module>
-        <module>hystrix-dashboard</module>
+    <modules>
+        <!-- Business layer -->
+        <module>api-driver</module>
+        <module>api-listen-order</module>
+        <module>api-passenger</module>
+
+        <!-- Service layer -->
+        <module>service-order</module>
+        <module>service-order-dispatch</module>
+        <module>service-passenger-user</module>
+        <module>service-sms</module>
+        <module>service-valuation</module>
+        <module>service-verification-code</module>
+        <module>service-wallet</module>
+
+        <!-- Infrastructure layer (hystrix-dashboard removed: Hystrix obsolete in Spring Cloud 2025.x) -->
+        <module>eureka</module>
+        <module>rydr-config-server</module>
+        <module>rydr-zuul</module>
         <module>cloud-admin</module>
 
-		<!-- Common layer -->
-		<module>rydr-common</module>
+        <!-- Common layer -->
+        <module>rydr-common</module>
 
-
-		<!-- Example layer -->
-		<module>config-client</module>
-		<module>rydr-demo-app</module>
-		<module>service-jms-consumer</module>
-		<module>service-jms-produce</module>
-		<module>config-client-diy</module>
-		
-
+        <!-- Example layer -->
+        <module>config-client</module>
+        <module>rydr-demo-app</module>
+        <module>service-jms-consumer</module>
+        <module>service-jms-produce</module>
+        <module>config-client-diy</module>
     </modules>
-    
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <java.version>1.8</java.version>
-        <mybatis.starter.version>1.3.2</mybatis.starter.version>
-        <druid.starter.version>1.1.10</druid.starter.version>
-        <pagehelper.version>1.2.5</pagehelper.version>
-		<spring-cloud.version>Greenwich.SR2</spring-cloud.version> 
+        <!-- JDK 17 baseline (Spring Boot 3.x requirement) -->
+        <java.version>17</java.version>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <!-- Spring Cloud release train (Boot 3.5 compatible) -->
+        <spring-cloud.version>2025.0.3</spring-cloud.version>
+        <!-- Third-party dependency versions (unified management, submodules omit version) -->
+        <mybatis-spring-boot.version>3.0.5</mybatis-spring-boot.version>
+        <redisson.version>3.46.0</redisson.version>
+        <jjwt.version>0.13.0</jjwt.version>
+        <spring-boot-admin.version>3.5.0</spring-boot-admin.version>
     </properties>
 
+    <dependencyManagement>
+        <dependencies>
+            <!-- Spring Cloud BOM -->
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <!-- MyBatis Spring Boot starter (Boot 3 compatible) -->
+            <dependency>
+                <groupId>org.mybatis.spring.boot</groupId>
+                <artifactId>mybatis-spring-boot-starter</artifactId>
+                <version>${mybatis-spring-boot.version}</version>
+            </dependency>
+            <!-- Redisson distributed lock -->
+            <dependency>
+                <groupId>org.redisson</groupId>
+                <artifactId>redisson</artifactId>
+                <version>${redisson.version}</version>
+            </dependency>
+            <!-- JJWT -->
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-api</artifactId>
+                <version>${jjwt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-impl</artifactId>
+                <version>${jjwt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-jackson</artifactId>
+                <version>${jjwt.version}</version>
+            </dependency>
+            <!-- Spring Boot Admin server -->
+            <dependency>
+                <groupId>de.codecentric</groupId>
+                <artifactId>spring-boot-admin-starter-server</artifactId>
+                <version>${spring-boot-admin.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
-	
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>org.springframework.cloud</groupId>
-				<artifactId>spring-cloud-dependencies</artifactId>
-				<version>${spring-cloud.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
-
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-			</plugin>
-		</plugins>
-	</build>
-	
+    <build>
+        <pluginManagement>
+            <plugins>
+                <!-- Version managed by spring-boot-starter-parent; enabled per-module that needs repackage -->
+                <plugin>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-maven-plugin</artifactId>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
 
 </project>

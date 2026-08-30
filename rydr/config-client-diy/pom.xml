@@ -5,10 +5,10 @@
 
 
 	<parent>
-		<groupId>org.springframework.boot</groupId>
-		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.1.7.RELEASE</version>
-		<relativePath/> <!-- lookup parent from repository -->
+		<groupId>com.rydr</groupId>
+		<artifactId>rydr-parent</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+		<relativePath/>
 	</parent>
 	
 	<groupId>com.rydr</groupId>
@@ -18,8 +18,8 @@
 	<description>Demo project for Spring Boot</description>
 
 	<properties>
-		<java.version>1.8</java.version>
-		<spring-cloud.version>Greenwich.SR2</spring-cloud.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 	</properties>
 
 	<dependencies>
@@ -45,6 +45,12 @@
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-bus-amqp</artifactId>
 		</dependency>
+
+		<!-- Bootstrap context (bootstrap.yml compatibility for Spring Cloud 2025.x) -->
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-bootstrap</artifactId>
+		</dependency>
 		
 		<!-- Test -->
 		<dependency>
@@ -65,28 +71,15 @@
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 
-        <!-- lombok -->
+        <!-- lombok (version managed by spring-boot-starter-parent) -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.8</version>
         </dependency>
 
 
 		
 	</dependencies>
-
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>org.springframework.cloud</groupId>
-				<artifactId>spring-cloud-dependencies</artifactId>
-				<version>${spring-cloud.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
 
 	<build>
 		<plugins>
