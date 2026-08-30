@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.rydr.mapper.OrderRulePriceDetailMapper" >
+
+  <insert id="insertSelective" parameterType="com.rydr.entity.OrderRulePriceDetail" useGeneratedKeys="true" keyProperty="id" >
+    insert into tbl_order_rule_price_detail
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="orderId != null" >order_id,</if>
+      <if test="category != null" >category,</if>
+      <if test="startHour != null" >start_hour,</if>
+      <if test="endHour != null" >end_hour,</if>
+      <if test="perKiloPrice != null" >per_kilo_price,</if>
+      <if test="perMinutePrice != null" >per_minute_price,</if>
+      <if test="duration != null" >duration,</if>
+      <if test="timePrice != null" >time_price,</if>
+      <if test="distance != null" >distance,</if>
+      <if test="distancePrice != null" >distance_price,</if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="orderId != null" >#{orderId,jdbcType=INTEGER},</if>
+      <if test="category != null" >#{category,jdbcType=VARCHAR},</if>
+      <if test="startHour != null" >#{startHour,jdbcType=INTEGER},</if>
+      <if test="endHour != null" >#{endHour,jdbcType=INTEGER},</if>
+      <if test="perKiloPrice != null" >#{perKiloPrice,jdbcType=DECIMAL},</if>
+      <if test="perMinutePrice != null" >#{perMinutePrice,jdbcType=DECIMAL},</if>
+      <if test="duration != null" >#{duration,jdbcType=DOUBLE},</if>
+      <if test="timePrice != null" >#{timePrice,jdbcType=DECIMAL},</if>
+      <if test="distance != null" >#{distance,jdbcType=DOUBLE},</if>
+      <if test="distancePrice != null" >#{distancePrice,jdbcType=DECIMAL},</if>
+    </trim>
+  </insert>
+
+  <insert id="insertList" parameterType="java.util.List" >
+    insert into tbl_order_rule_price_detail
+      (order_id, category, start_hour, end_hour, per_kilo_price, per_minute_price, duration, time_price, distance, distance_price)
+    values
+    <foreach collection="list" item="item" separator="," >
+      (#{item.orderId,jdbcType=INTEGER}, #{item.category,jdbcType=VARCHAR}, #{item.startHour,jdbcType=INTEGER},
+       #{item.endHour,jdbcType=INTEGER}, #{item.perKiloPrice,jdbcType=DECIMAL}, #{item.perMinutePrice,jdbcType=DECIMAL},
+       #{item.duration,jdbcType=DOUBLE}, #{item.timePrice,jdbcType=DECIMAL}, #{item.distance,jdbcType=DOUBLE},
+       #{item.distancePrice,jdbcType=DECIMAL})
+    </foreach>
+  </insert>
+
+  <delete id="deleteByOrderIdAndCategory" >
+    delete from tbl_order_rule_price_detail
+    where order_id = #{orderId,jdbcType=INTEGER}
+      and category = #{category,jdbcType=VARCHAR}
+  </delete>
+
+</mapper>

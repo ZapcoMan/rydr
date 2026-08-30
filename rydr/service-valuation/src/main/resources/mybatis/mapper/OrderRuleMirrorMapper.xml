@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.rydr.mapper.OrderRuleMirrorMapper" >
+
+  <select id="selectByOrderId" resultType="com.rydr.entity.OrderRuleMirror" parameterType="java.lang.Integer" >
+    select *
+    from tbl_order_rule_mirror
+    where order_id = #{orderId,jdbcType=INTEGER}
+    limit 1
+  </select>
+
+</mapper>

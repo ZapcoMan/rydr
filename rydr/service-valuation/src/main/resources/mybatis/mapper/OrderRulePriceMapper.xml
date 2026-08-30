@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.rydr.mapper.OrderRulePriceMapper" >
+
+  <insert id="insertSelective" parameterType="com.rydr.entity.OrderRulePrice" useGeneratedKeys="true" keyProperty="id" >
+    insert into tbl_order_rule_price
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="orderId != null" >order_id,</if>
+      <if test="category != null" >category,</if>
+      <if test="totalPrice != null" >total_price,</if>
+      <if test="totalDistance != null" >total_distance,</if>
+      <if test="totalTime != null" >total_time,</if>
+      <if test="cityCode != null" >city_code,</if>
+      <if test="cityName != null" >city_name,</if>
+      <if test="serviceTypeId != null" >service_type_id,</if>
+      <if test="serviceTypeName != null" >service_type_name,</if>
+      <if test="channelId != null" >channel_id,</if>
+      <if test="channelName != null" >channel_name,</if>
+      <if test="carLevelId != null" >car_level_id,</if>
+      <if test="carLevelName != null" >car_level_name,</if>
+      <if test="basePrice != null" >base_price,</if>
+      <if test="baseKilo != null" >base_kilo,</if>
+      <if test="baseMinute != null" >base_minute,</if>
+      <if test="lowestPrice != null" >lowest_price,</if>
+      <if test="nightStart != null" >night_start,</if>
+      <if test="nightEnd != null" >night_end,</if>
+      <if test="nightPerKiloPrice != null" >night_per_kilo_price,</if>
+      <if test="nightPerMinutePrice != null" >night_per_minute_price,</if>
+      <if test="nightDistance != null" >night_distance,</if>
+      <if test="nightTime != null" >night_time,</if>
+      <if test="nightPrice != null" >night_price,</if>
+      <if test="beyondStartKilo != null" >beyond_start_kilo,</if>
+      <if test="beyondPerKiloPrice != null" >beyond_per_kilo_price,</if>
+      <if test="beyondDistance != null" >beyond_distance,</if>
+      <if test="beyondPrice != null" >beyond_price,</if>
+      <if test="perKiloPrice != null" >per_kilo_price,</if>
+      <if test="path != null" >path,</if>
+      <if test="pathPrice != null" >path_price,</if>
+      <if test="perMinutePrice != null" >per_minute_price,</if>
+      <if test="duration != null" >duration,</if>
+      <if test="durationPrice != null" >duration_price,</if>
+      <if test="restDuration != null" >rest_duration,</if>
+      <if test="restDurationPrice != null" >rest_duration_price,</if>
+      <if test="restDistance != null" >rest_distance,</if>
+      <if test="restDistancePrice != null" >rest_distance_price,</if>
+      <if test="roadPrice != null" >road_price,</if>
+      <if test="parkingPrice != null" >parking_price,</if>
+      <if test="otherPrice != null" >other_price,</if>
+      <if test="dynamicDiscountRate != null" >dynamic_discount_rate,</if>
+      <if test="dynamicDiscount != null" >dynamic_discount,</if>
+      <if test="supplementPrice != null" >supplement_price,</if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="orderId != null" >#{orderId,jdbcType=INTEGER},</if>
+      <if test="category != null" >#{category,jdbcType=VARCHAR},</if>
+      <if test="totalPrice != null" >#{totalPrice,jdbcType=DECIMAL},</if>
+      <if test="totalDistance != null" >#{totalDistance,jdbcType=DOUBLE},</if>
+      <if test="totalTime != null" >#{totalTime,jdbcType=DOUBLE},</if>
+      <if test="cityCode != null" >#{cityCode,jdbcType=VARCHAR},</if>
+      <if test="cityName != null" >#{cityName,jdbcType=VARCHAR},</if>
+      <if test="serviceTypeId != null" >#{serviceTypeId,jdbcType=INTEGER},</if>
+      <if test="serviceTypeName != null" >#{serviceTypeName,jdbcType=VARCHAR},</if>
+      <if test="channelId != null" >#{channelId,jdbcType=INTEGER},</if>
+      <if test="channelName != null" >#{channelName,jdbcType=VARCHAR},</if>
+      <if test="carLevelId != null" >#{carLevelId,jdbcType=INTEGER},</if>
+      <if test="carLevelName != null" >#{carLevelName,jdbcType=VARCHAR},</if>
+      <if test="basePrice != null" >#{basePrice,jdbcType=DECIMAL},</if>
+      <if test="baseKilo != null" >#{baseKilo,jdbcType=DOUBLE},</if>
+      <if test="baseMinute != null" >#{baseMinute,jdbcType=DOUBLE},</if>
+      <if test="lowestPrice != null" >#{lowestPrice,jdbcType=DECIMAL},</if>
+      <if test="nightStart != null" >#{nightStart,jdbcType=TIME},</if>
+      <if test="nightEnd != null" >#{nightEnd,jdbcType=TIME},</if>
+      <if test="nightPerKiloPrice != null" >#{nightPerKiloPrice,jdbcType=DECIMAL},</if>
+      <if test="nightPerMinutePrice != null" >#{nightPerMinutePrice,jdbcType=DECIMAL},</if>
+      <if test="nightDistance != null" >#{nightDistance,jdbcType=DOUBLE},</if>
+      <if test="nightTime != null" >#{nightTime,jdbcType=DOUBLE},</if>
+      <if test="nightPrice != null" >#{nightPrice,jdbcType=DECIMAL},</if>
+      <if test="beyondStartKilo != null" >#{beyondStartKilo,jdbcType=DOUBLE},</if>
+      <if test="beyondPerKiloPrice != null" >#{beyondPerKiloPrice,jdbcType=DECIMAL},</if>
+      <if test="beyondDistance != null" >#{beyondDistance,jdbcType=DOUBLE},</if>
+      <if test="beyondPrice != null" >#{beyondPrice,jdbcType=DECIMAL},</if>
+      <if test="perKiloPrice != null" >#{perKiloPrice,jdbcType=DECIMAL},</if>
+      <if test="path != null" >#{path,jdbcType=DOUBLE},</if>
+      <if test="pathPrice != null" >#{pathPrice,jdbcType=DECIMAL},</if>
+      <if test="perMinutePrice != null" >#{perMinutePrice,jdbcType=DECIMAL},</if>
+      <if test="duration != null" >#{duration,jdbcType=DOUBLE},</if>
+      <if test="durationPrice != null" >#{durationPrice,jdbcType=DECIMAL},</if>
+      <if test="restDuration != null" >#{restDuration,jdbcType=DOUBLE},</if>
+      <if test="restDurationPrice != null" >#{restDurationPrice,jdbcType=DECIMAL},</if>
+      <if test="restDistance != null" >#{restDistance,jdbcType=DOUBLE},</if>
+      <if test="restDistancePrice != null" >#{restDistancePrice,jdbcType=DECIMAL},</if>
+      <if test="roadPrice != null" >#{roadPrice,jdbcType=DECIMAL},</if>
+      <if test="parkingPrice != null" >#{parkingPrice,jdbcType=DECIMAL},</if>
+      <if test="otherPrice != null" >#{otherPrice,jdbcType=DECIMAL},</if>
+      <if test="dynamicDiscountRate != null" >#{dynamicDiscountRate,jdbcType=DOUBLE},</if>
+      <if test="dynamicDiscount != null" >#{dynamicDiscount,jdbcType=DECIMAL},</if>
+      <if test="supplementPrice != null" >#{supplementPrice,jdbcType=DECIMAL},</if>
+    </trim>
+  </insert>
+
+  <delete id="deleteByOrderIdAndCategory" >
+    delete from tbl_order_rule_price
+    where order_id = #{orderId,jdbcType=INTEGER}
+      and category = #{category,jdbcType=VARCHAR}
+  </delete>
+
+</mapper>

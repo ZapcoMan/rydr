@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.rydr.mapper.OrderRulePriceTagMapper" >
+
+  <insert id="insertList" parameterType="java.util.List" >
+    insert into tbl_order_rule_price_tag
+      (order_id, category, tag_name, tag_price)
+    values
+    <foreach collection="list" item="item" separator="," >
+      (#{item.orderId,jdbcType=INTEGER}, #{item.category,jdbcType=VARCHAR}, #{item.tagName,jdbcType=VARCHAR},
+       #{item.tagPrice,jdbcType=DECIMAL})
+    </foreach>
+  </insert>
+
+  <delete id="deleteByOrderIdAndCategory" >
+    delete from tbl_order_rule_price_tag
+    where order_id = #{orderId,jdbcType=INTEGER}
+      and category = #{category,jdbcType=VARCHAR}
+  </delete>
+
+</mapper>
