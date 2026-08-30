@@ -1,23 +1,31 @@
 package com.rydr.eureka.config;
+
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.web.SecurityFilterChain;
+
 /**
+ * Spring Security 6 configuration: SecurityFilterChain replaces the removed WebSecurityConfigurerAdapter
+ *
  * @author oi
  */
 @Configuration
 @EnableWebSecurity
-public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
-	@Override
-	protected void configure(HttpSecurity http) throws Exception {
-		// Disable CSRF
-//		http.csrf().disable();
+public class WebSecurityConfig {
+
+	@Bean
+	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		/*
-		 * By default, applications with SpringSecurity dependency require a CSRF token for every request. Eureka clients do not add one during registration, so the /eureka/** path needs to be configured to not require a CSRF token.
+		 * By default, applications with SpringSecurity dependency require a CSRF token for every request.
+		 * Eureka clients do not add one during registration, so the /eureka/** path must be excluded
 		 */
-		http.csrf().ignoringAntMatchers("/eureka/**");
+		http.csrf(csrf -> csrf.ignoringRequestMatchers("/eureka/**"));
 		// Enable authentication with HttpBasic support
-		http.authorizeRequests().anyRequest().authenticated().and().httpBasic();
+		http.authorizeHttpRequests(requests -> requests.anyRequest().authenticated());
+		http.httpBasic(basic -> {
+		});
+		return http.build();
 	}
 }

@@ -4,18 +4,17 @@ import com.rydr.dto.ResponseResult;
 import com.rydr.common.dto.verificationcode.VerifyCodeResponse;
 import com.rydr.controller.VerifyCodeController;
 import com.rydr.service.VerifyCodeService;
-import junit.framework.TestCase;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @SpringBootTest
 //@Transactional
 @Slf4j
@@ -32,14 +31,14 @@ public class VerifyCodeServiceTest {
         String msgCode = "";
         ResponseResult generateResult = verifyCodeService.generate(1,phoneNumber);
         int code = generateResult.getCode();
-        Assert.assertEquals(0,code);
+        Assertions.assertEquals(0,code);
 
         if (code == 0){
             VerifyCodeResponse data = (VerifyCodeResponse)generateResult.getData();
             msgCode = data.getCode();
         }
 
-        TestCase.assertEquals(6,msgCode.length());
+        Assertions.assertEquals(6,msgCode.length());
     }
 
     @Test
@@ -51,6 +50,6 @@ public class VerifyCodeServiceTest {
         ResponseResult result = verifyCodeService.verify(1,phoneNumber,msgCode);
         int code = result.getCode();
 
-        Assert.assertEquals(0,code);
+        Assertions.assertEquals(0,code);
     }
 }
