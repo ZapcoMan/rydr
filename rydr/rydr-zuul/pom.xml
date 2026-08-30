@@ -10,7 +10,6 @@
 		<groupId>com.rydr</groupId>
 		<artifactId>rydr-parent</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
-		<relativePath/>
 	</parent>
 	
 	<groupId>com.rydr</groupId>
@@ -34,6 +33,19 @@
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-gateway</artifactId>
+		</dependency>
+
+		<!-- LoadBalancer: required by lb:// routes (replaces Ribbon) -->
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-loadbalancer</artifactId>
+		</dependency>
+
+		<!-- Guava RateLimiter used by the rate limiting filter -->
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>33.4.8-jre</version>
 		</dependency>
 
 		<dependency>
