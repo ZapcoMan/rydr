@@ -2,16 +2,17 @@ package com.rydr.util;
 
 import com.aliyun.oss.OSSClient;
 import com.aliyun.oss.model.ObjectMetadata;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.rydr.common.util.JsonUtil;
 import com.rydr.dto.phone.response.OssBaseResponse;
 
-import net.sf.json.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Base64Utils;
 import org.springframework.util.DigestUtils;
 
 import java.io.*;
+import java.util.Base64;
 
 /**
  * OSS File Upload Service
@@ -35,7 +36,8 @@ public class OssFileUploadService {
                 response.setStatus(1);
                 return response;
             }
-            byte[] decodeInput = Base64Utils.decodeFromString(input);
+            // org.springframework.util.Base64Utils was removed in Spring 6
+            byte[] decodeInput = Base64.getDecoder().decode(input);
             String imgType = "";
             int length = decodeInput.length;
             if (length == 0){
@@ -66,7 +68,7 @@ public class OssFileUploadService {
                 byteArrayInput = new ByteArrayInputStream(decodeInput);
                 client.putObject(ossConfig.getBucket(), key, byteArrayInput, metadata);
 
-                JSONObject jsonObject = new JSONObject();
+                ObjectNode jsonObject = JsonUtil.newObject();
                 jsonObject.put("result", 0);
                 jsonObject.put("key", key);
                 jsonObject.put("url", ossConfig.getEndpointUpload() + "/" + key);
