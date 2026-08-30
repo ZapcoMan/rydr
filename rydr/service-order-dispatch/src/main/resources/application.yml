@@ -1,6 +1,6 @@
 # Service port
 server:
-  port: 8005
+  port: 8006
 
 # Application name and configuration
 spring:

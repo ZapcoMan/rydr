@@ -60,13 +60,13 @@ public class AuthFilter extends ZuulFilter {
 
         if(StringUtils.isNotBlank(parseToken)) {
 			System.out.println("auth filter: verification passed");
+			requestContext.setSendZuulResponse(true);
 		} else {
 			// Stop forwarding to downstream filters
 			requestContext.setSendZuulResponse(false);
 			requestContext.setResponseStatusCode(HttpStatus.UNAUTHORIZED.value());
 			requestContext.setResponseBody("Authentication failed");
 		}
-		requestContext.setSendZuulResponse(true);
 		return null;
 	}
 	/**

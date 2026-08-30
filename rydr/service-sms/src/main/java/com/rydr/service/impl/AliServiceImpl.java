@@ -100,8 +100,15 @@ public class AliServiceImpl implements AliService {
     }
 
     private int sendMsg(String phoneNumber, String templateCode, String param) {
+        // Validate parameters before "sending" - empty params must not be treated as success
+        if (StringUtils.isBlank(phoneNumber) || StringUtils.isBlank(templateCode) || StringUtils.isBlank(param)) {
+            log.error("Invalid SMS send params: phoneNumber={}, templateCode={}, param={}", phoneNumber, templateCode, param);
+            return SmsStatusEnum.SEND_FAIL.getCode();
+        }
+        log.info("Sending SMS via provider API: phoneNumber={}, templateCode={}, param={}", phoneNumber, templateCode, param);
         /**
          * Implement according to the SMS provider's API
+         * e.g. Aliyun Dysmsapi: sendSms(accessKeyId, accessKeySecret, phoneNumber, templateCode, param)
     	*/
     	return SmsStatusEnum.SEND_SUCCESS.getCode();
 
