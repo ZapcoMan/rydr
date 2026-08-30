@@ -17,9 +17,10 @@ import org.springframework.web.client.RestTemplate;
 import com.rydr.dto.ResponseResult;
 import com.rydr.common.dto.order.ForecastRequest;
 import com.rydr.common.dto.order.ForecastResponse;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.rydr.common.util.JsonUtil;
 import com.rydr.passenger.feign.ServiceForecast;
 
-import net.sf.json.JSONObject;
 
 /**
  *
@@ -63,7 +64,7 @@ public class OrderController {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         // Request body
-        JSONObject requestParam = new JSONObject();
+        ObjectNode requestParam = JsonUtil.newObject();
         requestParam.put("startLatitude", "1");
         requestParam.put("startLongitude", "1");
         requestParam.put("endLatitude", "1");

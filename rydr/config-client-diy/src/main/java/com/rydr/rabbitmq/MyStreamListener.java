@@ -1,15 +1,19 @@
 package com.rydr.rabbitmq;
 
-import org.springframework.cloud.stream.annotation.EnableBinding;
-import org.springframework.cloud.stream.annotation.StreamListener;
-import org.springframework.cloud.stream.messaging.Sink;
+import java.util.function.Consumer;
 
-@EnableBinding(Sink.class)
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+/**
+ * Functional Spring Cloud Stream consumer (replaces the removed @EnableBinding / @StreamListener).
+ * Bean name "input" maps to binding name "input-in-0".
+ */
+@Configuration
 public class MyStreamListener {
 
-    @StreamListener(Sink.INPUT)
-    public void input(String s){
-
-        System.out.println("Listening to message queue manual content: " + s);
-    }
+	@Bean
+	public Consumer<String> input() {
+		return s -> System.out.println("Listening to message queue manual content: " + s);
+	}
 }

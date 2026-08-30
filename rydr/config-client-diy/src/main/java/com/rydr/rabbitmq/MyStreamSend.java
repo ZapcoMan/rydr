@@ -1,28 +1,28 @@
 package com.rydr.rabbitmq;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
-import org.springframework.cloud.stream.annotation.EnableBinding;
-import org.springframework.cloud.stream.messaging.Source;
-import org.springframework.integration.support.MessageBuilder;
-import org.springframework.messaging.MessageChannel;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@EnableBinding(Source.class)
+/**
+ * Functional Spring Cloud Stream producer (replaces the removed @EnableBinding(Source.class)).
+ * StreamBridge sends to the "output-out-0" binding configured in bootstrap.yml
+ */
 @RestController
 @RequestMapping("/rabbitmq")
 public class MyStreamSend {
 
     @Resource
-    private MessageChannel output;
+    private StreamBridge streamBridge;
 
     @PostMapping("/send")
     public String sendTestData(@RequestBody String content) {
-        this.output.send(MessageBuilder.withPayload(content).build());  // Send message
+        // Send message
+        streamBridge.send("output-out-0", content);
         return "Send successful";
     }
 }
