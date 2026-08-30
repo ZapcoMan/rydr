@@ -7,8 +7,6 @@ spring:
   application:
     name: service-passenger-user
   datasource: # Database connection configuration
-    # Data source type
-    type: com.alibaba.druid.pool.DruidDataSource
     # MySQL driver class
     driver-class-name: com.mysql.cj.jdbc.Driver
     # Database connection URL
@@ -17,21 +15,18 @@ spring:
     username: ${DB_USER:root}
     # Database password
     password: ${DB_PASSWORD:changeme}
-    # Database connection pool configuration
-    dbcp2:
-      # Initial number of connections
-      initial-size: 5
+    # HikariCP connection pool configuration (Boot default pool)
+    hikari:
       # Minimum idle connections
-      min-idle: 5
-      # Maximum number of connections
-      max-total: 5
-      # Maximum wait time for connection
-      max-wait-millis: 200
+      minimum-idle: 5
+      # Maximum pool size
+      maximum-pool-size: 20
+      # Maximum wait time for a connection (ms)
+      connection-timeout: 20000
+      # Maximum lifetime of a connection (ms)
+      max-lifetime: 1800000
       # Validate database connection
-      validation-query: SELECT 1
-      test-while-idle: true
-      test-on-borrow: false
-      test-on-return: false
+      connection-test-query: SELECT 1
 
 
 # MyBatis configuration

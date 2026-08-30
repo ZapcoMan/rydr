@@ -1,12 +1,8 @@
 # Basic gateway configuration
 # Features:
-# 1. Default routing
-# 2. Gateway load balancing
+# 1. Explicit routes (migrated from Netflix Zuul)
+# 2. Gateway load balancing (lb:// via Spring Cloud LoadBalancer)
 # 3. Route endpoints
-
-#api-driver:
-#  ribbon:
-#    NFLoadBalancerRuleClassName: com.netflix.loadbalancer.RandomRule
 
 server:
   port: 9100
@@ -14,6 +10,75 @@ server:
 spring:
   application:
     name: rydr-zuul
+  # Spring Cloud Gateway is reactive; rydr-common brings spring-boot-starter-web onto the classpath,
+  # so the application type must be forced to reactive
+  main:
+    web-application-type: reactive
+  cloud:
+    gateway:
+      routes:
+        # Business API layer
+        - id: api-driver
+          uri: lb://api-driver
+          predicates:
+            - Path=/api-driver/**
+          filters:
+            - StripPrefix=1
+        - id: api-passenger
+          uri: lb://api-passenger
+          predicates:
+            - Path=/api-passenger/**
+          filters:
+            - StripPrefix=1
+        - id: api-listen-order
+          uri: lb://api-listen-order
+          predicates:
+            - Path=/api-listen-order/**
+          filters:
+            - StripPrefix=1
+        # Service layer
+        - id: service-order
+          uri: lb://service-order
+          predicates:
+            - Path=/service-order/**
+          filters:
+            - StripPrefix=1
+        - id: service-order-dispatch
+          uri: lb://service-order-dispatch
+          predicates:
+            - Path=/service-order-dispatch/**
+          filters:
+            - StripPrefix=1
+        - id: service-passenger-user
+          uri: lb://service-passenger-user
+          predicates:
+            - Path=/service-passenger-user/**
+          filters:
+            - StripPrefix=1
+        - id: service-sms
+          uri: lb://service-sms
+          predicates:
+            - Path=/service-sms/**
+          filters:
+            - StripPrefix=1
+        - id: service-valuation
+          uri: lb://service-valuation
+          predicates:
+            - Path=/service-valuation/**
+          filters:
+            - StripPrefix=1
+        - id: service-verification-code
+          uri: lb://service-verification-code
+          predicates:
+            - Path=/service-verification-code/**
+          filters:
+            - StripPrefix=1
+        - id: service-wallet
+          uri: lb://service-wallet
+          predicates:
+            - Path=/service-wallet/**
+          filters:
+            - StripPrefix=1
 
 # Service registry
 eureka:
@@ -35,10 +100,10 @@ management:
       # Default is never
       show-details: ALWAYS
       enabled: true
-    routes:
+    gateway:
       enabled: true
 
 logging:
   level:
-    com.netflix: debug
-    org.springframework: DEBUG
+    org.springframework.cloud.gateway: DEBUG
+    org.springframework: INFO

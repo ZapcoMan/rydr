@@ -21,7 +21,9 @@ logging:
     root: info
 ---
 spring:
-  profiles: 7900
+  config:
+    activate:
+      on-profile: 7900
 server:
   port: 7900
 eureka:

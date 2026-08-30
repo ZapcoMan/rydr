@@ -14,8 +14,6 @@ spring:
     password: ${REDIS_PASSWORD:}
     # Database connection configuration
   datasource:
-    # Data source type
-    type: com.alibaba.druid.pool.DruidDataSource
     # MySQL driver class
     driver-class-name: com.mysql.cj.jdbc.Driver
     # Database connection URL
@@ -24,20 +22,18 @@ spring:
     username: ${DB_USER:root}
     # Database password
     password: ${DB_PASSWORD:changeme}
-    # Database connection pool configuration
-    dbcp2:
-      # Initial number of connections
-      initial-size: 5
+    # HikariCP connection pool configuration (Boot default pool)
+    hikari:
       # Minimum idle connections
-      min-idle: 5
-      # Maximum number of connections
-      max-total: 5
-      # Maximum wait time for connection
-      max-wait-millis: 200
-      validation-query: SELECT 1
-      test-while-idle: true
-      test-on-borrow: false
-      test-on-return: false
+      minimum-idle: 5
+      # Maximum pool size
+      maximum-pool-size: 20
+      # Maximum wait time for a connection (ms)
+      connection-timeout: 20000
+      # Maximum lifetime of a connection (ms)
+      max-lifetime: 1800000
+      # Validate database connection
+      connection-test-query: SELECT 1
 # Custom Redis Sentinel configuration
 sentinel:
   address:
@@ -70,13 +66,17 @@ mybatis:
 
 ---
 spring:
-  profiles: 8004
+  config:
+    activate:
+      on-profile: 8004
 # Service port
 server:
   port: 8004
 ---
 spring:
-  profiles: 8005
+  config:
+    activate:
+      on-profile: 8005
 # Service port
 server:
   port: 8005

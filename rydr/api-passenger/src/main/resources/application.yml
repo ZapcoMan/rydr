@@ -14,14 +14,17 @@ spring:
     port: ${REDIS_PORT:6379}
     timeout: 2000
 
-  # Zipkin distributed tracing
-  zipkin:
-    base-url: ${ZIPKIN_URL:http://localhost:9411/}
-    # Sampling rate: 1 = 100%
-  sleuth:
-    sampler:
-      rate: 1
-# Service registry
+  cloud:
+    # Enable OpenFeign circuit breaker (fallback support, replaces feign.hystrix.enabled)
+    openfeign:
+      circuitbreaker:
+        enabled: true
+    # LoadBalancer (replaces ribbon)
+    loadbalancer:
+      eager-load:
+        clients:
+        - SERVICE-SMS
+
 eureka:
   client:
     # Set service registry URL
@@ -38,10 +41,6 @@ feign:
       mime-types:
       - text/xml
       min-request-size: 2048
-  # Enable Feign Hystrix circuit breaker
-  hystrix:
-    enabled: true
-
   client:
     config:
       service-valuation:
@@ -51,17 +50,10 @@ feign:
         read-timeout: 5000
         logger-level: basic
 
-#service-sms:
-#  ribbon:
-#    NFLoadBalancerRuleClassName: com.netflix.loadbalancer.RandomRule
-service-valuation:
-  ribbon:
-    NFLoadBalancerRuleClassName: com.netflix.loadbalancer.RandomRule
-ribbon:
-  eager-load:
-    enabled: false
-    clients:
-    - SERVICE-SMS
+# Ribbon configuration removed: Netflix Ribbon was replaced by Spring Cloud LoadBalancer
+# Use spring.cloud.loadbalancer.* instead
+
+
 
 
 # Admin monitoring

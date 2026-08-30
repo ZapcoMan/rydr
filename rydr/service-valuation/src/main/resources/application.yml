@@ -9,6 +9,34 @@ spring:
   profiles:
     active:
     - 8060
+  # Database connection configuration (HikariCP, Boot default pool)
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:rydr}?characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
+    username: ${DB_USER:root}
+    password: ${DB_PASSWORD:changeme}
+    hikari:
+      minimum-idle: 5
+      maximum-pool-size: 20
+      connection-timeout: 20000
+      max-lifetime: 1800000
+      connection-test-query: SELECT 1
+  # Redis: used by the price/rule caches
+  redis:
+    database: 0
+    host: ${REDIS_HOST:127.0.0.1}
+    port: ${REDIS_PORT:6379}
+    timeout: 2000
+    password: ${REDIS_PASSWORD:}
+
+# MyBatis configuration
+mybatis:
+  mapper-locations:
+    - classpath:mybatis/mapper/*.xml
+  type-aliases-package: com.rydr.entity
+  configuration:
+    # tbl_order_rule_price.order_id -> OrderRulePrice.orderId
+    map-underscore-to-camel-case: true
 
 # Service registry
 eureka:
@@ -29,11 +57,15 @@ management:
       show-details: ALWAYS
 ---
 spring:
-  profiles: 8060
+  config:
+    activate:
+      on-profile: 8060
 server:
   port: 8060
 ---
 spring:
-  profiles: 8061
+  config:
+    activate:
+      on-profile: 8061
 server:
   port: 8061

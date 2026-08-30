@@ -3,9 +3,5 @@ server:
 spring:
   application:
     name: message
-  mvc:
-    view:
-      prefix: /WEB-INF/jsp
-      suffix: .html
   thymeleaf:
-    cash: false
+    cache: false
