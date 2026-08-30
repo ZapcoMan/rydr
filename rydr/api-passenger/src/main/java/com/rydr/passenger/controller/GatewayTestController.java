@@ -2,20 +2,20 @@ package com.rydr.passenger.controller;
 
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.netflix.eureka.CloudEurekaClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.rydr.common.util.JsonUtil;
 import com.rydr.dto.ResponseResult;
 
 import lombok.extern.slf4j.Slf4j;
-import net.sf.json.JSONObject;
 
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
@@ -42,7 +42,7 @@ public class GatewayTestController {
 		System.out.println("Passenger API: token: "+token);
 		System.out.println("Passenger API: cookie: "+cookie);
 
-		JSONObject result = new JSONObject();
+		ObjectNode result = JsonUtil.newObject();
 		result.put("api-passenger", "Passenger API service");
 
 		return ResponseResult.success(result);

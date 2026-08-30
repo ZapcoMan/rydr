@@ -2,7 +2,7 @@ package com.rydr.common.dto.passengeruser;
 
 import lombok.Data;
 
-import javax.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotBlank;
 
 /**
  * @author oi
