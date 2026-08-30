@@ -1,6 +1,6 @@
 package com.rydr.jms.produce.service;
 
-import javax.jms.Destination;
+import jakarta.jms.Destination;
 
 /**
  * @author oi
