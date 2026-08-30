@@ -8,7 +8,6 @@
 		<groupId>com.rydr</groupId>
 		<artifactId>rydr-parent</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
-		<relativePath/>
 	</parent>
 	
 	<groupId>com.rydr.order</groupId>
