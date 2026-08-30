@@ -1,22 +1,30 @@
 package com.rydr.config;
 
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.SecurityFilterChain;
 
+/**
+ * Spring Security 6 configuration: SecurityFilterChain replaces the removed WebSecurityConfigurerAdapter
+ */
 @Configuration
 @EnableWebSecurity
-public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+public class WebSecurityConfig {
 
-	@Override
-	protected void configure(HttpSecurity http) throws Exception {
+	@Bean
+	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		// Disable CSRF
-		http.csrf().disable();
+		http.csrf(AbstractHttpConfigurer::disable);
 		// All requests must be authenticated before they can be processed
-		http.httpBasic().and().authorizeRequests().anyRequest().fullyAuthenticated();
+		http.authorizeHttpRequests(requests -> requests.anyRequest().fullyAuthenticated());
+		http.httpBasic(basic -> {
+		});
 		// All REST services should be set to stateless to improve efficiency and performance
-		http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+		http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+		return http.build();
 	}
 }

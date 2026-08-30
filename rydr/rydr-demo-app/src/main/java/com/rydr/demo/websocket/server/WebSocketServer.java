@@ -3,16 +3,18 @@ package com.rydr.demo.websocket.server;
 import java.io.IOException;
 import java.util.concurrent.CopyOnWriteArraySet;
 
-import javax.websocket.OnClose;
-import javax.websocket.OnError;
-import javax.websocket.OnMessage;
-import javax.websocket.OnOpen;
-import javax.websocket.Session;
-import javax.websocket.server.PathParam;
-import javax.websocket.server.ServerEndpoint;
+import jakarta.websocket.OnClose;
+import jakarta.websocket.OnError;
+import jakarta.websocket.OnMessage;
+import jakarta.websocket.OnOpen;
+import jakarta.websocket.Session;
+import jakarta.websocket.server.PathParam;
+import jakarta.websocket.server.ServerEndpoint;
 import org.springframework.stereotype.Component;
 
-import net.sf.json.JSONObject;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 /**
  *
  * @author oi
@@ -21,6 +23,9 @@ import net.sf.json.JSONObject;
 @ServerEndpoint("/websocket/{sid}")
 @Component
 public class WebSocketServer {
+
+	// Jackson mapper used to build/parse WebSocket payloads
+	private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
 	// Static variable to track the current number of online connections. Should be designed as thread-safe.
 	private static int onlineCount = 0;
@@ -44,7 +49,7 @@ public class WebSocketServer {
 		System.out.println("New window started listening: " + sid + ", current online count: " + getOnlineCount());
 		this.sid = sid;
 		try {
-			JSONObject j = new JSONObject();
+			ObjectNode j = OBJECT_MAPPER.createObjectNode();
 			j.put("to", sid);
 			j.put("data", "{}");
 			sendMessage(j.toString());
@@ -74,8 +79,8 @@ public class WebSocketServer {
 		// Broadcast message
 		for (WebSocketServer item : webSocketSet) {
 			try {
-				JSONObject m = JSONObject.fromObject(message);
-				String sid = m.getString("to");
+				JsonNode m = OBJECT_MAPPER.readTree(message);
+				String sid = m.path("to").asText();
 				if (item.sid.equals(sid)) {
 					item.sendMessage(message);
 					break;
