@@ -46,6 +46,16 @@
 			<artifactId>spring-cloud-starter-bus-amqp</artifactId>
 		</dependency>
 
+		<!-- Spring Cloud Stream: functional programming model (StreamBridge / Consumer) -->
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-stream</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-stream-binder-rabbit</artifactId>
+		</dependency>
+
 		<!-- Bootstrap context (bootstrap.yml compatibility for Spring Cloud 2025.x) -->
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
