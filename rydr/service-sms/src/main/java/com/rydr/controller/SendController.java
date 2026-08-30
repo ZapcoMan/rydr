@@ -8,10 +8,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.rydr.common.util.JsonUtil;
 import com.rydr.dto.ResponseResult;
 
 import lombok.extern.slf4j.Slf4j;
-import net.sf.json.JSONObject;
 /**
  * @author oi
  */
@@ -26,8 +26,8 @@ public class SendController {
 	@RequestMapping(value = "/alisms-template",method = RequestMethod.POST)
     public ResponseResult send(@RequestBody SmsSendRequest smsSendRequest){
 		// Output received parameter content
-        JSONObject param = JSONObject.fromObject(smsSendRequest);
-        log.info("/send/alisms-template   request: "+param.toString());
+        String param = JsonUtil.toJson(smsSendRequest);
+        log.info("/send/alisms-template   request: "+param);
         aliService.sendSms(smsSendRequest);
         return  ResponseResult.success("");
     }
