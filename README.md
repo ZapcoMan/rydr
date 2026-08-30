@@ -4,9 +4,9 @@
 
 **基于 Spring Cloud 的微服务网约车平台**
 
-[![Java](https://img.shields.io/badge/Java-8+-orange.svg)](https://www.oracle.com/java/)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-2.1.7-brightgreen.svg)](https://spring.io/projects/spring-boot)
-[![Spring Cloud](https://img.shields.io/badge/Spring%20Cloud-Greenwich-blue.svg)](https://spring.io/projects/spring-cloud)
+[![Java](https://img.shields.io/badge/Java-17-orange.svg)](https://www.oracle.com/java/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.16-brightgreen.svg)](https://spring.io/projects/spring-boot)
+[![Spring Cloud](https://img.shields.io/badge/Spring%20Cloud-2025.0.3-blue.svg)](https://spring.io/projects/spring-cloud)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
@@ -48,7 +48,7 @@ Rydr 是一套完整的在线网约车系统，用于演示企业级 **Spring Cl
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│                   API 网关（Zuul :9100）                      │
+│       API 网关（Spring Cloud Gateway :9100）                  │
 ├──────────────┬───────────────┬───────────────────────────────┤
 │ api-passenger│   api-driver  │      api-listen-order         │  ← API 层
 │    :9011     │  :9002-9003   │          :8084                │
@@ -56,7 +56,7 @@ Rydr 是一套完整的在线网约车系统，用于演示企业级 **Spring Cl
 │  service-order  │ service-sms │ service-valuation │ ...      │  ← 服务层
 │    :8004-8005   │  :8002-8003 │    :8060-8061     │          │
 ├──────────────────────────────────────────────────────────────┤
-│  Eureka :7900 │ Config :6001 │ Admin :6010 │ Zipkin :9411   │  ← 基础设施层
+│  Eureka :7900 │ Config :6001 │ Admin :6010 │                 │  ← 基础设施层
 └──────────────────────────────────────────────────────────────┘
          │              │              │              │
     ┌────┴────┐    ┌────┴────┐   ┌────┴────┐   ┌────┴────┐
@@ -68,8 +68,8 @@ Rydr 是一套完整的在线网约车系统，用于演示企业级 **Spring Cl
 
 | 模式 | 技术 | 使用场景 |
 |---------|-----------|----------|
-| 声明式 HTTP | OpenFeign + Hystrix | api-passenger → service-valuation |
-| 负载均衡 HTTP | RestTemplate + Ribbon | api-driver → service-sms |
+| 声明式 HTTP | OpenFeign（circuitbreaker/fallback） | api-passenger → service-valuation |
+| 负载均衡 HTTP | RestTemplate + LoadBalancer | api-driver → service-sms |
 | 服务发现 | Netflix Eureka | 所有服务注册与发现 |
 | 异步消息 | ActiveMQ（JMS） | 后台任务处理 |
 | 配置刷新 | RabbitMQ（Spring Cloud Bus） | 动态配置更新 |
@@ -89,7 +89,7 @@ Rydr 是一套完整的在线网约车系统，用于演示企业级 **Spring Cl
 | 模块 | 工程名 | 端口 | 说明 |
 |--------|-------------|------|-------------|
 | 订单服务 | `service-order` | 8004-8005 | 订单生命周期与分布式锁 |
-| 派单服务 | `service-order-dispatch` | 8005 | 司机-订单匹配 |
+| 派单服务 | `service-order-dispatch` | 8006 | 司机-订单匹配 |
 | 乘客服务 | `service-passenger-user` | 8012 | 注册、资料、地址 |
 | 短信服务 | `service-sms` | 8002-8003 | 短信通知下发 |
 | 计价服务 | `service-valuation` | 8060-8061 | 行程定价与费用计算 |
@@ -102,8 +102,7 @@ Rydr 是一套完整的在线网约车系统，用于演示企业级 **Spring Cl
 |--------|-------------|------|-------------|
 | 注册中心 | `eureka` | 7900 | Netflix Eureka |
 | 配置中心 | `rydr-config-server` | 6001 | 集中化配置 |
-| API 网关 | `rydr-zuul` | 9100 | Zuul 路由与过滤 |
-| 熔断器监控 | `hystrix-dashboard` | 6101 | Hystrix 监控面板 |
+| API 网关 | `rydr-zuul` | 9100 | Spring Cloud Gateway 路由与过滤 |
 | 服务监控 | `cloud-admin` | 6010 | Spring Boot Admin |
 
 ### 共享库
@@ -116,29 +115,27 @@ Rydr 是一套完整的在线网约车系统，用于演示企业级 **Spring Cl
 
 | 分类 | 技术 |
 |----------|-----------|
-| **框架** | Spring Boot 2.1.7 + Spring Cloud Greenwich |
+| **框架** | Spring Boot 3.5.16 + Spring Cloud 2025.0.3（JDK 17） |
 | **服务发现** | Netflix Eureka |
-| **API 网关** | Netflix Zuul |
-| **负载均衡** | Netflix Ribbon |
-| **熔断器** | Netflix Hystrix |
+| **API 网关** | Spring Cloud Gateway |
+| **负载均衡** | Spring Cloud LoadBalancer |
+| **熔断降级** | OpenFeign circuitbreaker/fallback |
 | **服务间调用** | OpenFeign |
-| **数据库** | MySQL 5.7+，Druid 连接池 |
-| **ORM** | MyBatis |
-| **缓存** | Redis（支持哨兵模式） |
+| **数据库** | MySQL 5.7+，HikariCP 连接池 |
+| **ORM** | MyBatis（mybatis-spring-boot 3.0.5） |
+| **缓存/分布式锁** | Redis（支持哨兵模式）+ Redisson 3.46.0 |
 | **消息中间件** | ActiveMQ（JMS） |
 | **配置管理** | Spring Cloud Config + RabbitMQ Bus |
-| **链路追踪** | Spring Cloud Sleuth + Zipkin |
-| **认证** | JWT |
+| **认证** | JWT（JJWT 0.13.0） |
+| **监控** | Spring Boot Admin 3.5.0 |
 | **构建工具** | Maven 3.x |
-
-> **注意：** 本项目使用 Spring Boot 2.1.x 与 Spring Cloud Greenwich，二者均已停止维护（EOL）。作为微服务模式的学习参考仍然有价值，但生产环境建议升级到受支持的版本线。
 
 ## 环境要求
 
-- **Java** 8+
-- **Maven** 3.x
-- **MySQL** 5.7+
-- **Redis** 4.0+
+- **Java** 17+
+- **Maven** 3.6+
+- **MySQL** 5.7+（驱动 `com.mysql.cj.jdbc.Driver`）
+- **Redis** 4.0+（支持哨兵模式）
 - ActiveMQ *(可选，用于 JMS 特性)*
 - RabbitMQ *(可选，用于配置总线)*
 
@@ -166,6 +163,8 @@ cp .env.example .env
 | `DB_PORT` | MySQL 端口 | `3306` |
 | `DB_USER` | MySQL 用户名 | `root` |
 | `DB_PASSWORD` | MySQL 密码 | `changeme` |
+| `DB_NAME` | 业务库（订单/计价） | `rydr` |
+| `DB_NAME_THREE` | 业务库（乘客/短信） | `rydr-three` |
 | `REDIS_HOST` | Redis 主机 | `127.0.0.1` |
 | `EUREKA_USER` | Eureka 认证用户名 | `admin` |
 | `EUREKA_PASSWORD` | Eureka 认证密码 | `changeme` |
@@ -203,7 +202,7 @@ cd rydr/service-valuation && mvn spring-boot:run -Dspring.profiles.active=8060
 cd rydr/api-passenger && mvn spring-boot:run
 cd rydr/api-driver && mvn spring-boot:run -Dspring.profiles.active=9002
 
-# 5. API 网关
+# 5. API 网关（Spring Cloud Gateway）
 cd rydr/rydr-zuul && mvn spring-boot:run
 ```
 
@@ -214,7 +213,7 @@ cd rydr/rydr-zuul && mvn spring-boot:run
 | Eureka 注册中心 | 7900 |
 | 配置中心 | 6001 |
 | 服务监控（Cloud Admin） | 6010 |
-| API 网关（Zuul） | 9100 |
+| API 网关（Spring Cloud Gateway） | 9100 |
 | api-passenger | 9011 |
 | api-driver | 9002, 9003 |
 | api-listen-order | 8084 |
@@ -223,10 +222,11 @@ cd rydr/rydr-zuul && mvn spring-boot:run
 | service-order | 8004, 8005 |
 | service-valuation | 8060, 8061 |
 | service-verification-code | 8011 |
-| service-wallet | 8006 |
-| service-order-dispatch | 8005 |
+| service-order-dispatch | 8006 |
+| service-wallet | 8006 * |
 | 演示应用 | 8083 |
-| Hystrix Dashboard | 6101 |
+
+> *`service-wallet` 与 `service-order-dispatch` 当前均使用 8006 端口，存在冲突，启动前需调整其一。
 
 ## 项目结构
 
@@ -240,11 +240,10 @@ rydr/                                # 仓库根目录
 │   ├── config-client/               # 配置中心客户端示例
 │   ├── config-client-diy/           # 自定义配置中心客户端
 │   ├── eureka/                      # Eureka 注册中心
-│   ├── hystrix-dashboard/           # Hystrix 监控面板
 │   ├── rydr-common/                 # 共享公共库
 │   ├── rydr-config-server/          # 配置中心服务端
 │   ├── rydr-demo-app/               # 演示应用
-│   ├── rydr-zuul/                   # API 网关
+│   ├── rydr-zuul/                   # API 网关（Spring Cloud Gateway）
 │   ├── service-jms-consumer/        # JMS 消费者示例
 │   ├── service-jms-produce/         # JMS 生产者示例
 │   ├── service-order/               # 订单服务
@@ -492,7 +491,14 @@ sequenceDiagram
 - 部署生产前请复核 `management.endpoints.web.exposure` 配置
 - 完整的安全相关变量清单见 [`.env.example`](.env.example)
 
-> **代码中的已知待办项**：部分模块仍处于演示/脚手架状态，接入生产前需补齐。主要包括：`service-sms` 的短信发送为桩实现（`AliServiceImpl#sendMsg` 直接返回成功）；`api-passenger` 的验证码发送接口被注释并直接返回 `null`；`service-valuation` 的 `/forecast/single` 返回硬编码价格；`service-wallet` 暂无业务代码；`rydr-zuul` 的 `RequestCheckFilter` 中签名密钥为未解析的占位符字符串。此外 `service-order-dispatch` 与 `service-order` 的 8005 端口存在冲突，需调整其一。
+> **代码中的已知待办项**：本项目作为教学/演示项目，部分模块仍处于脚手架状态，接入生产前需补齐。主要包括：
+> - **端口冲突**：`service-order-dispatch` 与 `service-wallet` 均使用 8006；且 `service-wallet` 注册到 `eureka-7901`（其余服务均为 `eureka-7900`），配置不一致。
+> - **码值体系混用**：`ResponseResult`（success=0/fail=1）与 `CommonStatusEnum`（SUCCESS=1/FAIL=0）两套码值并存，跨模块判定时需确认使用哪一套，否则会导致如"验证码校验/登录"链路误判失败。
+> - **`service-valuation` 地图地址未配置**：`services.map` 未在配置中提供，`requestRoute`/`requestDistance` 可能拼出 `null` 地址；且该服务开启了 Security `fullyAuthenticated`，`api-passenger` 的 Feign 调用未带认证头，存在 401 风险。
+> - **`service-order` Redis 多 RedissonClient**：存在多个 `RedissonClient` bean，按类型注入可能产生歧义。
+> - **`service-sms` 短信发送为桩实现**：`AliServiceImpl#sendMsg` 恒返回成功；模板缓存未判空且无过期机制。
+> - **`rydr-zuul`**：已迁移为 Spring Cloud Gateway，但 `RequestCheckFilter` 的签名密钥默认值（`default-secret`）与测试（`test-secret-key`）不一致，需统一。
+> - **其他**：`api-listen-order` 的监听核心逻辑仍为注释（桩实现）；`service-passenger-user#login` 无并发保护；`api-driver#TestController.admin()` 为故意演示 OOM 的接口，不应在生产暴露；部分测试类存在包名复制错误。
 
 ## 贡献指南
 
