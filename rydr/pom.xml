@@ -96,6 +96,7 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+
             <!-- MyBatis Spring Boot starter (Boot 3 compatible) -->
             <dependency>
                 <groupId>org.mybatis.spring.boot</groupId>
@@ -142,6 +143,15 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+
+    <!-- Dependencies shared by every module -->
+    <dependencies>
+        <!-- commons-lang3: replaces commons-lang 2.x, which Spring Boot 3 no longer provides -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+        </dependency>
+    </dependencies>
 
     <build>
         <pluginManagement>
