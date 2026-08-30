@@ -12,7 +12,7 @@ import com.rydr.dao.entity.ServiceSmsRecord;
 import com.rydr.dao.entity.ServiceSmsTemplate;
 import com.rydr.common.dto.sms.SmsSendRequest;
 import com.rydr.common.dto.sms.SmsTemplateDto;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

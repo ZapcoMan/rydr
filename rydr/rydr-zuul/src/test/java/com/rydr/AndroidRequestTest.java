@@ -5,10 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.lang.StringUtils;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.LinkedMultiValueMap;
@@ -19,7 +16,7 @@ public class AndroidRequestTest {
 
 
 	@Test
-	public void userRequest() throws JSONException {
+	public void userRequest() {
 
 		String secret = "test-secret-key";
 
