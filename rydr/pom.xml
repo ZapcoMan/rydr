@@ -157,6 +157,22 @@
                 <artifactId>logstash-logback-encoder</artifactId>
                 <version>${logstash-logback.version}</version>
             </dependency>
+
+            <!-- ===== Configuration center (Spring Cloud Config) ===== -->
+            <!--
+                spring-cloud-starter-config / spring-cloud-starter-bootstrap versions are
+                managed by the Spring Cloud BOM (spring-cloud-dependencies) imported above,
+                so no <version> is pinned here. Declared explicitly to document that these
+                two starters are the canonical config-client deps shared by the 18 modules.
+            -->
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-starter-config</artifactId>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-starter-bootstrap</artifactId>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 

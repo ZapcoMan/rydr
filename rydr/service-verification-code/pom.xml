@@ -52,11 +52,16 @@
 			<scope>test</scope>
 		</dependency>
 		
-		<!-- Config center client: config-client -->
-		<!--<dependency>-->
-			<!--<groupId>org.springframework.cloud</groupId>-->
-			<!--<artifactId>spring-cloud-config-client</artifactId>-->
-		<!--</dependency>-->
+		<!-- Config center client (version managed by rydr-parent / Spring Cloud BOM) -->
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-config</artifactId>
+		</dependency>
+		<!-- Bootstrap context (bootstrap.yml compatibility for Spring Cloud 2025.x) -->
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-bootstrap</artifactId>
+		</dependency>
 		
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

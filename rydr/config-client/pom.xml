@@ -58,10 +58,10 @@
 			<scope>test</scope>
 		</dependency>
 		
-		<!-- Config center client: config-client -->
+		<!-- Config center client (version managed by rydr-parent / Spring Cloud BOM) -->
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-config-client</artifactId>
+			<artifactId>spring-cloud-starter-config</artifactId>
 		</dependency>
 		
 		<dependency>
