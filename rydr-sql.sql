@@ -1,4 +1,4 @@
-
+奥
 
 SET FOREIGN_KEY_CHECKS=0;
 
@@ -1190,6 +1190,7 @@ CREATE TABLE `tbl_order` (
   `is_following` int(1) NOT NULL DEFAULT '0' COMMENT 'is ride-along order: 0 no, 1 yes',
   `is_fake_success` int(1) NOT NULL DEFAULT '0' COMMENT 'is false success order: 0 no, 1 yes',
   `memo` varchar(500) CHARACTER SET utf8mb4 NOT NULL DEFAULT '' COMMENT 'memo',
+  `fare_amount` decimal(10,2) DEFAULT NULL COMMENT 'structured fare for this order (settled at trip end)',
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'create_time',
   `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'update_time',
   `user_feature` int(2) DEFAULT '0' COMMENT '1: child ride\r\n2: female ride',
@@ -2165,5 +2166,27 @@ CREATE TABLE `tbl_order_rule_price_tag` (
   PRIMARY KEY (`id`),
   KEY `idx_order_id` (`order_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='billing detail fee item table';
+
+-- ----------------------------
+-- tx_message: reliable-message outbox (3.6 data consistency)
+-- Used by service-order to guarantee "local DB commit + JMS send" via the
+-- local-message-table + JmsTransactionManager pattern. A scheduled job
+-- re-delivers INIT/overdue messages until the wallet consumer confirms.
+-- ----------------------------
+DROP TABLE IF EXISTS `tx_message`;
+CREATE TABLE `tx_message` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `biz_key` varchar(64) NOT NULL COMMENT 'unique business key, e.g. PAY_<orderId>',
+  `topic` varchar(64) NOT NULL COMMENT 'JMS destination (queue) name',
+  `payload` varchar(1024) NOT NULL COMMENT 'JSON business payload',
+  `status` int(2) NOT NULL DEFAULT '0' COMMENT '0 INIT, 1 SENT, 2 DONE, 3 FAIL',
+  `retry` int(4) NOT NULL DEFAULT '0' COMMENT 'delivery attempt count',
+  `next_retry_at` timestamp NULL DEFAULT NULL COMMENT 'next delivery time (for backoff)',
+  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'create_time',
+  `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'update_time',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_biz_key` (`biz_key`),
+  KEY `idx_status_next_retry` (`status`, `next_retry_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='reliable message outbox for cross-service eventual consistency';
 
 
