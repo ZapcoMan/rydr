@@ -15,14 +15,19 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 
+import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
 /**
  * Request legitimacy check (Spring Cloud Gateway version of the previous Zuul filter).
  *
+ * <p>The shared secret is read from {@code ZUUL_SECRET}; the client side must use the same
+ * value, see AndroidRequestTest which resolves it from the same property and default.
+ *
  * @author oi
  */
 @Component
+@Slf4j
 public class RequestCheckFilter implements GlobalFilter, Ordered {
 
 	@Value("${ZUUL_SECRET:default-secret}")
@@ -40,7 +45,7 @@ public class RequestCheckFilter implements GlobalFilter, Ordered {
 			return chain.filter(exchange);
 		}
 
-		System.out.println("request check intercepted");
+		log.debug("request check intercepted");
 
 		boolean flag = true;
 		Long timestamp = null;
@@ -61,7 +66,7 @@ public class RequestCheckFilter implements GlobalFilter, Ordered {
 		}
 
 		if (flag) {
-			System.out.println("Request is legitimate");
+			log.debug("Request is legitimate");
 			return chain.filter(exchange);
 		}
 
@@ -70,7 +75,7 @@ public class RequestCheckFilter implements GlobalFilter, Ordered {
 		response.setStatusCode(HttpStatus.BAD_REQUEST);
 		DataBuffer buffer = response.bufferFactory()
 				.wrap("Illegal request".getBytes(StandardCharsets.UTF_8));
-		System.out.println("Request is illegal");
+		log.warn("Rejected an illegal request to {}", exchange.getRequest().getURI());
 		return response.writeWith(Mono.just(buffer));
 	}
 
