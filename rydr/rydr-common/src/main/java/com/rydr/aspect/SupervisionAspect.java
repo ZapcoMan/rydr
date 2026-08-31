@@ -15,6 +15,7 @@ import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jms.core.JmsMessagingTemplate;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
@@ -23,6 +24,11 @@ import java.util.Optional;
 /**
  * Aspect operations for insert, update, and delete
  *
+ * <p>Disabled unless {@code government-upload.enabled=true}. This aspect requires an
+ * {@code ActiveMQQueue} and a {@code JmsMessagingTemplate} bean, which most services do not
+ * define, so creating it unconditionally makes every module depending on rydr-common fail
+ * to start with an unresolvable placeholder / missing bean error.
+ *
  * @author yueyi2019
  * @date 2018/8/22
  */
@@ -30,6 +36,7 @@ import java.util.Optional;
 @Component
 @RequiredArgsConstructor
 @Slf4j
+@ConditionalOnProperty(prefix = "government-upload", name = "enabled", havingValue = "true")
 public class SupervisionAspect {
 
     @NonNull
@@ -38,7 +45,8 @@ public class SupervisionAspect {
     @NonNull
     private JmsMessagingTemplate jmsTemplate;
 
-    @Value("${government-upload.enabled}")
+    /** Defaulted as well, so the placeholder can never fail to resolve. */
+    @Value("${government-upload.enabled:false}")
     private boolean isGovernmentUploadEnabled;
 
     /**

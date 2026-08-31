@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.rydr.dto.ResponseResult;
-import com.rydr.passenger.fallback.SmsClientFallback;
+import com.rydr.passenger.fallback.SmsClientFallbackFactory;
 
 /**
  * @author oi
@@ -15,9 +15,11 @@ import com.rydr.passenger.fallback.SmsClientFallback;
 
 
 //@FeignClient(name = "service-sms",configuration = FeignDisableHystrixConfiguration.class)
-//@FeignClient(name = "service-sms",fallbackFactory = SmsClientFallbackFactory.class)
-@FeignClient(name = "service-sms",fallback = SmsClientFallback.class)
 //@FeignClient(name = "service-sms")
+//@FeignClient(name = "service-sms",fallback = SmsClientFallback.class)
+// FallbackFactory is preferred over fallback: it also exposes the failure cause, and it
+// returns a normal failure response instead of throwing out of the circuit breaker.
+@FeignClient(name = "service-sms",fallbackFactory = SmsClientFallbackFactory.class)
 public interface SmsClient {
 	/**
 	 * Send verification code via SMS template
