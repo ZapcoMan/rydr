@@ -13,21 +13,54 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * RSA helper.
+ *
+ * <p>The key pair is supplied externally through the {@code rydr.rsa.public-key} /
+ * {@code rydr.rsa.private-key} system properties, or the {@code RYDR_RSA_PUBLIC_KEY} /
+ * {@code RYDR_RSA_PRIVATE_KEY} environment variables. A private key must never be committed
+ * to source control.
+ *
+ * <p>When nothing is configured an ephemeral key pair is generated so the demo still runs;
+ * anything encrypted with it is unreadable after a restart.
+ */
 public class RSAEncrypt {
 	
 	// Used to store randomly generated public and private keys
-	private static Map<Integer, String> keyMap = new HashMap<Integer, String>();  
+	private static final Map<Integer, String> keyMap = new HashMap<Integer, String>();  
 	
 	static {
-		String publicKeyString = "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDefDQOvm1MdubDmaYUzee1+uukQx2qjSv/KIYDUF4Lg0R8OzcaLUcOdWvjkhBUa0p1Uf9WBir81erZZnPM9TxnQjcl9xmEuzmu63Ykdf2Y+kUU8fibVmnlXxrm+7lEF+bCL3CIaTACa0i602zkJTdQvhPKrBNtNa/zoh/6OKfaCwIDAQAB";
-		String privateKeyString = "MIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBAN58NA6+bUx25sOZphTN57X666RDHaqNK/8ohgNQXguDRHw7NxotRw51a+OSEFRrSnVR/1YGKvzV6tlmc8z1PGdCNyX3GYS7Oa7rdiR1/Zj6RRTx+JtWaeVfGub7uUQX5sIvcIhpMAJrSLrTbOQlN1C+E8qsE201r/OiH/o4p9oLAgMBAAECgYEAvDRXGS3PacKfXVGJo8m2vEOhuJep7c90K2mNTBpdI+IMOgchirxIgpukA6NYuwDzwKD3nT6keLNA8lzvkq7VQ3RJv7yQTjuc6foVZjI05M/QCz0qa3Ss2rwASkKu+FQFrN1eSrPIktkVVVeKUepdqE43ZVnFxB2hsFRFV85mIHkCQQD2xCgUebWV3OHViA9wCKpTcRpODt1KyTEHIFBQDrUVDV4EhuYYXQwOakbItBoLMtl2nue9uD1s11adwkqK90C3AkEA5s9zm221S+fZz+DBEibThiwjxOFbv431mfvmFe/IR5x08FmzTJorzgsEQen79KTTbid5ELArzWGxt+TZqLi1TQJAKsgDMtmO87ZhqMV397Jo5SJ8rv/AudB7oYKmqdqC5m102VAR4DNxfaZLM0yWH07niLsv7iJc89u5doxSpBkNrQJAe60bqGRf6h2BNAedzQkq/NE4FW4gSINb4Df/MS/8JIssigG2tsxBvrVegadMT+nmNTdHgu6zeejoXr5s9yCKXQJAVZ/I9pdYfobPs4HFbJBHMW0uzxyx1YAi4F46J9zKE027gs1mq5I4lRfxi9IfJtduM6OtWNqKdC1cLqt9aSqvsw==";
-		
-		// Save public and private keys to Map
-		// 0 represents public key, 1 represents private key
-		keyMap.put(0,publicKeyString);
-		keyMap.put(1,privateKeyString);
+		String publicKeyString = resolve("rydr.rsa.public-key", "RYDR_RSA_PUBLIC_KEY");
+		String privateKeyString = resolve("rydr.rsa.private-key", "RYDR_RSA_PRIVATE_KEY");
+
+		if (publicKeyString.isBlank() || privateKeyString.isBlank()) {
+			// Nothing configured: generate a throw-away pair rather than shipping a fixed secret
+			try {
+				genKeyPair();
+			} catch (NoSuchAlgorithmException e) {
+				throw new IllegalStateException("RSA key pair generation is not available", e);
+			}
+		} else {
+			// Save public and private keys to Map
+			// 0 represents public key, 1 represents private key
+			keyMap.put(0,publicKeyString);
+			keyMap.put(1,privateKeyString);
+		}
 	}
 
+	/**
+	 * Read a setting from a system property first, then from the environment.
+	 *
+	 * @return the configured value, never {@code null}
+	 */
+	private static String resolve(String propertyName, String envName) {
+		String value = System.getProperty(propertyName);
+		if (value != null && !value.isBlank()) {
+			return value;
+		}
+		value = System.getenv(envName);
+		return value == null ? "" : value;
+	}
 
 
 	/**
