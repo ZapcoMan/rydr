@@ -1664,6 +1664,43 @@ CREATE TABLE `tbl_passenger_wallet` (
   UNIQUE KEY `idx_userid` (`passenger_info_id`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=221 DEFAULT CHARSET=utf8 COMMENT='passenger wallet';
 
+-- ----------------------------
+-- Table structure for tbl_wallet_transaction
+-- ----------------------------
+DROP TABLE IF EXISTS `tbl_wallet_transaction`;
+CREATE TABLE `tbl_wallet_transaction` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `passenger_info_id` int(16) DEFAULT NULL COMMENT 'passenger ID',
+  `biz_no` varchar(64) NOT NULL COMMENT 'unique business number for idempotency',
+  `type` int(4) DEFAULT NULL COMMENT '1 recharge 2 pay 3 refund 4 freeze 5 unfreeze',
+  `amount` decimal(10,2) DEFAULT NULL COMMENT 'transaction amount',
+  `capital_before` decimal(10,2) DEFAULT NULL COMMENT 'balance before transaction',
+  `capital_after` decimal(10,2) DEFAULT NULL COMMENT 'balance after transaction',
+  `remark` varchar(128) DEFAULT NULL COMMENT 'remark',
+  `create_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'create time',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `idx_biz_no` (`biz_no`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='wallet transaction flow';
+
+-- ----------------------------
+-- Table structure for tbl_wallet_recharge
+-- ----------------------------
+DROP TABLE IF EXISTS `tbl_wallet_recharge`;
+CREATE TABLE `tbl_wallet_recharge` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `passenger_info_id` int(16) DEFAULT NULL COMMENT 'passenger ID',
+  `out_trade_no` varchar(64) NOT NULL COMMENT 'merchant order no, unique',
+  `amount` decimal(10,2) DEFAULT NULL COMMENT 'recharge amount',
+  `pay_type` int(4) DEFAULT NULL COMMENT 'payment channel: 1 alipay 2 wechat 3 unionpay',
+  `status` int(4) DEFAULT '0' COMMENT '0 init 1 paid 2 failed',
+  `trade_no` varchar(64) DEFAULT NULL COMMENT 'third-party trade no',
+  `paid_time` timestamp NULL DEFAULT NULL COMMENT 'payment success time',
+  `create_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'create time',
+  `update_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'update time',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `idx_out_trade_no` (`out_trade_no`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='wallet recharge order';
+
 DROP TABLE IF EXISTS `tbl_passenger_wallet_1106`;
 CREATE TABLE `tbl_passenger_wallet_1106` (
   `id` int(16) NOT NULL DEFAULT '0',
