@@ -43,7 +43,7 @@ management:
     web:
       exposure:
         # In YAML use double quotes; in properties files quotes are not needed
-        include: "*"
+        include: health,info
 
 env: NaN
 ---

@@ -39,6 +39,6 @@ management:
     web:
       exposure:
         #In yml use double quotes, in properties no quotes needed
-        include: "*"
+        include: health,info
 
 env: NaN
