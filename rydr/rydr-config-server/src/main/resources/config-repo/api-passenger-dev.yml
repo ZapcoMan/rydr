@@ -1,0 +1,16 @@
+# ============================================================
+# api-passenger (dev) — centralized config from rydr-config-server
+# Sensitive values use ${ENV:REQUIRED_CHANGEME}; override via env in production.
+# Local application.yml remains as a fallback (spring.cloud.config.fail-fast=false).
+# ============================================================
+spring:
+  data:
+    redis:
+      host: ${REDIS_HOST:127.0.0.1}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://${EUREKA_USER:admin}:${EUREKA_PASSWORD:REQUIRED_CHANGEME}@${EUREKA_HOST:eureka-7900}:7900/eureka/
