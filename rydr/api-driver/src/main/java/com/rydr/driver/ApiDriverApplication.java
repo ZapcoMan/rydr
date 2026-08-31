@@ -3,6 +3,7 @@ package com.rydr.driver;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
@@ -15,6 +16,7 @@ import com.rydr.driver.annotation.ExcudeRibbonConfig;
  */
 
 @SpringBootApplication
+@EnableFeignClients
 // Scan excludes classes annotated with the specified annotation
 @ComponentScan(
         basePackages = {"com.rydr"},
