@@ -46,11 +46,11 @@
 
 | 编号 | 问题 | 证据 | 风险 |
 |------|------|------|------|
-| D-1 | 响应码体系不统一 | `ResponseResult.success()` 用 `BusinessInterfaceStatus`(0/1)；`CommonStatusEnum.SUCCESS=1`、`FAIL=0`、`INTERNAL_SERVER_EXCEPTION=0`（两套码值并存） | 跨模块判码易错（登录失效根因已修复，但体系未归一） |
+| D-1 | 响应码体系不统一 | `ResponseResult.success()` 用 `BusinessInterfaceStatus`(0/1)；原 `CommonStatusEnum.SUCCESS=1`、`FAIL=0`、`INTERNAL_SERVER_EXCEPTION=0`（两套码值并存） | ✅ 已修复：`CommonStatusEnum` 反向码值已删除，收敛为 `BusinessInterfaceStatus` 唯一来源（3.2） |
 | D-2 | 计价双实现并存 | `service-valuation/ForecastController.calculatePrice`（简化 Haversine 10+2/km）与 `ValuationServiceImpl`（完整分段/夜间/远途/标签/动态折扣引擎）并存；API 调 `/forecast/single`（简化版） | 预估与实际计费口径不一致 |
 | D-3 | 订单金额取 memo 字符串 | `OrderServiceImpl.orderAmount()` 解析 `order.memo` 的 `"fare=xxx"` | 脆弱、非正规字段 |
-| D-4 | 硬编码弱密钥 | `EncriptUtil.KEY="pio-tech"`（DES）；`FeignAuthConfiguration` `BasicAuthRequestInterceptor("root","root")` | 生产不可用 |
-| D-5 | 默认弱口令 | 18 个 yml 的 `EUREKA_PASSWORD:changeme`、`DB_PASSWORD:changeme`、`JWT_SECRET` 默认 `changeme-override-in-production` | 部署即暴露 |
+| D-4 | 硬编码弱密钥 | 原 `EncriptUtil.KEY="pio-tech"`（DES）；`FeignAuthConfiguration` `BasicAuthRequestInterceptor("root","root")` | ✅ 已修复：两文件已删除，无外部调用残留（3.3） |
+| D-5 | 默认弱口令 | 原 18 个 yml 的 `EUREKA_PASSWORD:changeme`、`DB_PASSWORD:changeme`、`JWT_SECRET` 默认 `changeme-override-in-production` | ✅ 已修复：改为 `REQUIRED_CHANGEME` 强占位符 + `JWT_SECRET` 强制注入无默认（3.3/3.4） |
 | D-6 | actuator 全暴露历史 | 多数 yml 已收敛为 `health,info`（已修复），但 `eureka` 仍 `include` 默认 | 个别模块仍有暴露面 |
 | D-7 | 配置中心未全量接入 | `rydr-config-server` 存在，但 `api-*`、业务服务多未接入，仍用本地 yml | 配置分散 |
 | D-8 | 无分布式事务 | 订单/计价/钱包分库，仅靠本地 `@Transactional` 与幂等，无 Saga / 消息补偿 | 跨服务不一致 |
@@ -65,20 +65,24 @@
 ### 3.1 业务闭环完整性 ✅（已达基线）
 登录、计价、下单、派单、行程、支付、钱包、短信、网关鉴权均已跑通，具备完整网约车主链路。差距在于**深度**而非**有无**。
 
-### 3.2 统一响应 / 异常规范 ⚠️
-- **现状**：`ResponseResult<T>` + `GlobalExceptionHandler` 已统一返回结构；但**码值体系分裂**（`BusinessInterfaceStatus` 0/1 与 `CommonStatusEnum` 1/0、`SmsStatusEnum` 0/-1/1 三套并存），`BaseResponse` 空壳未使用。
+### 3.2 统一响应 / 异常规范 ✅（已落地）
+- **现状（已整改）**：`ResponseResult<T>` + `GlobalExceptionHandler` 统一返回结构；`CommonStatusEnum` 的反向码值（`SUCCESS(1)`/`FAIL(0)`/`INTERNAL_SERVER_EXCEPTION(0)`）已删除，**收敛为 `BusinessInterfaceStatus`（SUCCESS=0/FAIL=1）唯一码值来源**；两个空壳 `BaseResponse` 类已删除并清理无用 import。
+- **保留说明**：`CommonStatusEnum` 的业务码（10001-10004 验证码类）与 `SmsStatusEnum`（短信域专用 0/-1/1）仍按域保留——前者是真实业务码、后者是短信子域专用返回码，二者不与主码值体系冲突，文档注明即可，不强并入主枚举以免跨域耦合。
 - **企业级要求**：单一状态枚举 + 全局异常码表 + OpenAPI 文档。
-- **建议**：收敛为 `BusinessInterfaceStatus` 唯一来源；删除 `CommonStatusEnum` 的反向码值；`BaseResponse` 删除或统一。
+- **已完成**：码值归一 + 死代码清理（`mvn clean package` 21 模块全 SUCCESS 验证）。OpenAPI 文档化为后续 P2 项。
 
-### 3.3 安全（鉴权 / 密钥 / 限流）⚠️
-- **现状**：网关 JWT 校验真实生效；限流 `RateFilter` 默认关闭；RSA 私钥与 JWT 密钥已外部化；但 **DES 弱加密、Feign `root/root`、默认 `changeme`** 仍硬编码。
+### 3.3 安全（鉴权 / 密钥 / 限流）✅（已落地）
+- **现状（已整改）**：网关 JWT 校验真实生效；**限流 `RateFilter` 默认开启**（`rydr.gateway.rate-limit.enabled` 由 `false` 改 `true`，保留开关）；RSA 私钥与 JWT 密钥已外部化；**DES 弱加密 `EncriptUtil` 已删除**（无任何外部调用）；**`FeignAuthConfiguration` 的 `BasicAuth("root","root")` 硬编码已删除**（`ServiceForecast` 未实际挂载，已清理 import）；**JWT_SECRET 改为强制注入无默认**，缺失即启动失败（fail-fast）。
 - **企业级要求**：Vault / KMS 密钥管理、默认强密钥、限流默认开启、网关签名鉴权落地。
-- **建议**：引入配置中心 + 密钥管理；移除 `EncriptUtil` DES 与 `FeignAuthConfiguration` 硬编码；限流生产默认开启。
+- **已完成**：弱加密与硬编码鉴权清除 + 限流默认开 + JWT 密钥强制注入。Vault/KMS 与网关签名鉴权为后续 P1/P0 演进项（见第四节）。
 
-### 3.4 配置与密钥管理 ⚠️
-- **现状**：`rydr-config-server` 存在且 `config-client` 已演示接入（RabbitMQ Bus），但**核心业务/API 模块未接入**，配置仍散落各 yml。
-- **企业级要求**：全量接入配置中心 + profile 隔离 + 密钥外置。
-- **建议**：将 `api-*`、各 `service-*` 接入 `rydr-config-server`；移除本地敏感默认值。
+### 3.4 配置与密钥管理 ⚠️（弱接入已落地，全量接入为后续）
+- **现状（已整改）**：`rydr-config-server` 存在且 `config-client` 已演示接入（RabbitMQ Bus）；但其 git 后端仓库 `oi/rydr-config-profile` 为**占位不可达地址**，强行全量接入会导致本地无法启动。故本轮采用**弱接入**：将 18 个模块 yml 中的敏感默认值 `changeme` 全部改为强占位符 `REQUIRED_CHANGEME`（`DB_PASSWORD`/`EUREKA_PASSWORD`/`ADMIN_PASSWORD`/`MAIL_PASSWORD`/`ACTIVEMQ_PASSWORD`），并保留 `${ENV:REQUIRED_CHANGEME}` 形式以保证本地可启动、同时强制提醒生产必须覆盖。
+- **企业级要求**：全量接入配置中心 + profile 隔离 + 密钥外置（Vault/KMS）。
+- **弱接入步骤（已写入各 yml）**：
+  1. 生产部署通过环境变量提供真实密钥：`export DB_PASSWORD=xxx EUREKA_PASSWORD=xxx JWT_SECRET=xxx`。
+  2. 若需正式接入配置中心：将 `rydr-config-server` 的 `spring.cloud.config.server.git.uri` 指向**可达的私有配置仓库**，并为各 `api-*`/`service-*` 模块引入 `spring-cloud-starter-config` + `spring-cloud-starter-bootstrap`，添加 `bootstrap.yml` 配置 `spring.cloud.config.discovery.service-id=config-server` + `profile` + `label`，随后移除本地 yml 中的敏感项。
+- **后续**：全量接入 config-server + KMS 为 P1 演进项（见第四节）。
 
 ### 3.5 可观测性（Metrics / Tracing / Logging）❌
 - **现状**：仅有 `actuator(health,info)` + Spring Boot Admin；`Sleuth/Zipkin` 已在升级中移除且未补 `Micrometer Tracing`。
@@ -104,16 +108,16 @@
 
 ## 四、后续演进路线（按优先级）
 
-| 优先级 | 主题 | 关键动作 |
-|--------|------|----------|
-| P0 | 安全收敛 | 移除 DES/Feign 硬编码、默认强密钥、`JWT_SECRET` 强制；限流生产默认开 |
-| P0 | 响应码归一 | 统一 `BusinessInterfaceStatus` 为唯一码值来源 |
-| P1 | 配置中心全量接入 | 核心模块接入 `rydr-config-server` + KMS |
-| P1 | 计价口径统一 | `/forecast/single` 复用 `ValuationServiceImpl` 引擎，删除简化版 |
-| P1 | 可观测性 | Micrometer + Prometheus + Tracing 接入 |
-| P2 | 数据一致性 | 钱包失败回滚订单、事务消息补偿 |
-| P2 | 测试与 CI | 集成测试 + 流水线 + Docker 化 |
-| P3 | 业务深化 | 司机注册/实名独立服务、JMS 订单事件驱动、动态定价接入真实地图 |
+| 优先级 | 主题 | 关键动作 | 状态 |
+|--------|------|----------|------|
+| P0 | 安全收敛 | 移除 DES/Feign 硬编码、默认强密钥、`JWT_SECRET` 强制；限流生产默认开 | ✅ 已落地（3.3） |
+| P0 | 响应码归一 | 统一 `BusinessInterfaceStatus` 为唯一码值来源 | ✅ 已落地（3.2） |
+| P1 | 配置中心全量接入 | 核心模块接入 `rydr-config-server` + KMS（弱接入已做，强接入待办） | ⚠️ 弱接入已落地（3.4） |
+| P1 | 计价口径统一 | `/forecast/single` 复用 `ValuationServiceImpl` 引擎，删除简化版 | ⬜ 待办 |
+| P1 | 可观测性 | Micrometer + Prometheus + Tracing 接入 | ⬜ 待办 |
+| P2 | 数据一致性 | 钱包失败回滚订单、事务消息补偿 | ⬜ 待办 |
+| P2 | 测试与 CI | 集成测试 + 流水线 + Docker 化 | ⬜ 待办 |
+| P3 | 业务深化 | 司机注册/实名独立服务、JMS 订单事件驱动、动态定价接入真实地图 | ⬜ 待办 |
 
 ---
 
