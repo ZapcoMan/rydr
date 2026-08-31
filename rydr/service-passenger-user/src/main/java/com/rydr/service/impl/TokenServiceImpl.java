@@ -5,9 +5,12 @@ import com.rydr.service.TokenService;
 
 import java.util.Date;
 
+import org.springframework.stereotype.Service;
+
 /**
  * @author oi
  */
+@Service
 public class TokenServiceImpl implements TokenService {
 
     /**
@@ -17,8 +20,6 @@ public class TokenServiceImpl implements TokenService {
      */
     @Override
     public String createToken(String subject) {
-        String jwtStr = JwtUtil.createToken(subject,new Date());
-        // Store in cache, set expiration time
-        return null;
+        return JwtUtil.createToken(subject, new Date());
     }
 }

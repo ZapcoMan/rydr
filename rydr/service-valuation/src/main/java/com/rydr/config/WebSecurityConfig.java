@@ -19,8 +19,18 @@ public class WebSecurityConfig {
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		// Disable CSRF
 		http.csrf(AbstractHttpConfigurer::disable);
-		// All requests must be authenticated before they can be processed
-		http.authorizeHttpRequests(requests -> requests.anyRequest().fullyAuthenticated());
+		// Internal service-to-service endpoints (called by api-passenger / api-driver through
+		// the gateway or Feign) must stay open, otherwise the forecast / valuation calls
+		// return 401 and the whole order flow breaks. External management endpoints remain
+		// authenticated.
+		http.authorizeHttpRequests(requests -> requests
+				.requestMatchers(
+						"/forecast/**",
+						"/valuation/**",
+						"/actuator/health",
+						"/error")
+				.permitAll()
+				.anyRequest().fullyAuthenticated());
 		http.httpBasic(basic -> {
 		});
 		// All REST services should be set to stateless to improve efficiency and performance

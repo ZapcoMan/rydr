@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.rydr.wallet.mapper.WalletTransactionMapper" >
+
+  <resultMap id="BaseResultMap" type="com.rydr.wallet.entity.WalletTransaction" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="passenger_info_id" property="passengerInfoId" jdbcType="INTEGER" />
+    <result column="biz_no" property="bizNo" jdbcType="VARCHAR" />
+    <result column="type" property="type" jdbcType="INTEGER" />
+    <result column="amount" property="amount" jdbcType="DECIMAL" />
+    <result column="capital_before" property="capitalBefore" jdbcType="DECIMAL" />
+    <result column="capital_after" property="capitalAfter" jdbcType="DECIMAL" />
+    <result column="remark" property="remark" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    id, passenger_info_id, biz_no, type, amount, capital_before, capital_after, remark, create_time
+  </sql>
+
+  <insert id="insert" parameterType="com.rydr.wallet.entity.WalletTransaction" >
+    insert into tbl_wallet_transaction
+      (passenger_info_id, biz_no, type, amount, capital_before, capital_after, remark, create_time)
+    values
+      (#{passengerInfoId}, #{bizNo}, #{type}, #{amount}, #{capitalBefore}, #{capitalAfter}, #{remark}, #{createTime})
+  </insert>
+
+  <select id="selectByBizNo" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from tbl_wallet_transaction
+    where biz_no = #{bizNo}
+    limit 1
+  </select>
+
+</mapper>

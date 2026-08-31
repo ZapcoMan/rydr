@@ -32,14 +32,12 @@ public class VerifyCodeServiceImpl implements VerifyCodeService {
     public ResponseResult generate(int identity , String phoneNumber){
 
         // Validate send time limit, three-tier verification, cannot send SMS without restrictions
-//        checkSendCodeTimeLimit(phoneNumber);
+        ResponseResult limit = checkSendCodeTimeLimit(phoneNumber);
+        if (limit != null && limit.getCode() != com.rydr.constatnt.BusinessInterfaceStatus.SUCCESS.getCode()) {
+            return limit;
+        }
 
         String code = String.valueOf((int)((Math.random()*9+1)*Math.pow(10,5)));
-
-        /**
-         * Some people use this approach to generate a 6-digit code. Incorrect usage - although the result is correct most of the time, it should not be used this way as occasionally the number of digits may be insufficient.
-         */
-//        String code = String.valueOf(new Random().nextInt(1000000));
 
         // Generate Redis key
         String keyPre = RedisKeyUtil.generateKeyPreByIdentity(identity);
@@ -78,26 +76,43 @@ public class VerifyCodeServiceImpl implements VerifyCodeService {
 
 
     /**
-     * Check send time limit for this phone number
-     * @param phoneNumber
-     * @return
+     * Check send time limit for this phone number.
+     *
+     * Three-tier rate limiting using Redis counters with sliding TTL:
+     *  - within 1 minute:   at most 1 send
+     *  - within 10 minutes: at most 3 sends
+     *  - within 24 hours:   at most 5 sends
+     *
+     * @param phoneNumber phone number
+     * @return {@link ResponseResult#success} when allowed, a failure with the
+     *         corresponding {@link CommonStatusEnum} code otherwise
      */
     private ResponseResult checkSendCodeTimeLimit(String phoneNumber){
-        // Check if there are limits for 1 minute, 10 minutes, 24 hours.
+        if (StringUtils.isBlank(phoneNumber)) {
+            return ResponseResult.success("");
+        }
 
-        return ResponseResult.success("");
-    }
+        long[] windows = {60, 600, 86400};
+        int[] limits = {1, 3, 5};
+        CommonStatusEnum[] hitEnum = {
+                CommonStatusEnum.VERIFICATION_ONE_MIN_ERROR,
+                CommonStatusEnum.VERIFICATION_TEN_MIN_ERROR,
+                CommonStatusEnum.VERIFICATION_ONE_HOUR_ERROR
+        };
 
-    public static void main(String[] args) {
-
-        for (int i = 0; i < 5000; i++) {
-            String code = String.valueOf(new Random().nextInt(1000000));
-//            String code = String.valueOf((int)((Math.random()*9+1)*Math.pow(10,5)));
-            if (code.length()<6){
-                System.out.println("There are numbers with fewer than 6 digits");
+        for (int i = 0; i < windows.length; i++) {
+            String limitKey = "verify_code_limit_" + windows[i] + "_" + phoneNumber;
+            BoundValueOperations<String, String> ops = redisTemplate.boundValueOps(limitKey);
+            Long count = ops.increment();
+            if (count != null && count == 1) {
+                // First hit in this window: set the expiry so the counter resets automatically
+                ops.expire(windows[i], TimeUnit.SECONDS);
+            }
+            if (count != null && count > limits[i]) {
+                return ResponseResult.fail(hitEnum[i].getCode(), hitEnum[i].getValue());
             }
         }
 
-
+        return ResponseResult.success("");
     }
 }
