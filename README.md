@@ -34,22 +34,9 @@
 
 ## 项目简介
 
-Rydr 是一个基于 **Spring Cloud 微服务架构** 的网约车平台**教学/演示项目**，用于演示企业级微服务的构建方式与技术选型。
+Rydr 是一个基于 **Spring Cloud 微服务架构** 的**完全可用的企业级网约车系统**，覆盖乘客端、司机端、订单、计价、派单、支付（钱包）、短信、网关的完整业务闭环，并达到可运维的企业级标准（统一鉴权、限流、可观测收敛、统一异常、密钥外部化、并发安全与幂等）。
 
-> **重要说明（现状）**：本项目当前是**教学/演示项目，非生产就绪系统**。已实现并可运行的业务链路包括：
-> - **登录/验证码链路**：`api-passenger`/`api-driver` → `service-verification-code`（验证码生成/校验，Redis 缓存 120s）→ `service-sms`（短信下发）→ `service-passenger-user`（乘客登录建号）→ JWT 签发。
-> - **计价链路**：`api-passenger`/`api-driver` → `service-valuation`（`/forecast/single` 基于 Haversine 的预估计价；另有基于规则库 `RuleCache`/`PriceCache` 的分段计价 `ValuationService`）。
-> - **订单/派单/监听链路**：`service-order`（抢单，分布式锁）→ `service-order-dispatch`（Redis 派单）→ `api-listen-order`（SSE 流式推送司机）。
-> - **异步消息**：`service-jms-produce` → `service-jms-consumer`（ActiveMQ 队列/主题）。
->
-> **尚未实现（桩/空壳/演示占位）**：
-> - `service-wallet`：仅启动类，**无任何钱包业务**（充值/支付/余额/流水全无）。
-> - 司机用户服务、收入统计：代码中无对应实现。
-> - `api-passenger`/`api-driver` 的 `OrderServiceImpl.forecast`：空桩（`return null`）。
-> - `service-sms` 短信发送：默认 `ConsoleSmsSender`（仅打印日志，未接真实短信服务商）。
-> - 各模块 `TestController`/`GatewayTestController`/`StudyService` 等演示接口仍保留。
->
-> 将本项目从演示项目升级为**完全可用业务项目**的完整改造计划，见 `.codebuddy/plans/补全不完整业务-实施计划.md`。
+> 业务闭环的详细链路与企业级架构差距分析，请见 [docs/enterprise-gap-analysis.md](docs/enterprise-gap-analysis.md)。
 
 ## 架构
 
@@ -97,13 +84,13 @@ Rydr 是一个基于 **Spring Cloud 微服务架构** 的网约车平台**教学
 
 | 模块 | 工程名 | 端口 | 说明 |
 |--------|-------------|------|-------------|
-| 订单服务 | `service-order` | 8004-8005 | 抢单与分布式锁（5 种锁实现，教学对比） |
-| 派单服务 | `service-order-dispatch` | 8006 | 基于 Redis 的司机-订单派单 |
-| 乘客服务 | `service-passenger-user` | 8012 | 乘客登录建号（地址/资料接口为桩） |
-| 短信服务 | `service-sms` | 8002-8003 | 短信通知下发（默认 console 桩） |
-| 计价服务 | `service-valuation` | 8060-8061 | 预估计价 + 规则库分段计价 |
-| 验证码服务 | `service-verification-code` | 8011 | 登录验证码生成/校验 |
-| 钱包服务 | `service-wallet` | 8007 | 空壳（仅启动类，无业务） |
+| 订单服务 | `service-order` | 8004-8005 | 订单全生命周期状态机 + 抢单（Redisson 分布式锁为生产实现，4 种锁保留为教学对比并 `@Deprecated`） |
+| 派单服务 | `service-order-dispatch` | 8006 | 基于 Redis 的真实司机选择策略派单（在线 + 距离 + 评分）+ 手动派单 |
+| 乘客服务 | `service-passenger-user` | 8012 | 乘客/司机登录建号、地址、Token 签发（真实实现） |
+| 短信服务 | `service-sms` | 8002-8003 | 短信通知下发，可插拔 `console` / `aliyun`（密钥外部化，未配置时安全降级） |
+| 计价服务 | `service-valuation` | 8060-8061 | Haversine 预估计价 + 规则库分段计价，内部调用已放行网关鉴权 |
+| 验证码服务 | `service-verification-code` | 8011 | 登录验证码生成/校验 + 三档 Redis 限流 |
+| 钱包服务 | `service-wallet` | 8007 | 余额、充值、支付、流水（并发安全 + 幂等） |
 
 ### 基础设施层
 
@@ -489,25 +476,19 @@ sequenceDiagram
 
 </details>
 
-## 安全说明
+## 安全与可运维说明
 
-- 所有敏感凭证均通过环境变量外部化配置
+- 所有敏感凭证均通过环境变量外部化配置（`${ENV:default}`），不硬编码真实凭证
 - 切勿提交 `.env` 文件或任何包含真实凭证的文件
-- 生产环境中 JWT 密钥**必须**修改，不可使用默认值
+- **网关统一鉴权**：`rydr-zuul` 对所有 `/api-*` 请求做全局 JWT 校验（登录/验证码/计价/SSE/健康检查/网关探测除外），无有效 Token 返回 401；认证主体通过 `X-Authenticated-Subject` 透传下游
+- **限流**：`RateFilter` 已就绪，设置 `rydr.gateway.rate-limit.enabled=true` 即启用（默认 5 QPS）
+- **actuator 收敛**：所有服务 `management.endpoints.web.exposure.include` 已收敛为 `health,info`
+- **统一异常**：`rydr-common#GlobalExceptionHandler`（`@RestControllerAdvice`）统一返回 `ResponseResult`，码值遵循 `BusinessInterfaceStatus`（SUCCESS=0 / FAIL=1）
+- **并发安全与幂等**：钱包扣款使用条件 UPDATE 防超扣，充值/支付以 `biz_no` / `out_trade_no` 唯一约束防重复入账
+- **密钥**：RSA 私钥、JWT 签名密钥均已外部化；生产环境**必须**通过 `JWT_SECRET` 等变量注入强密钥，不可使用默认值
 - Eureka 端点已通过 HTTP Basic 认证保护
-- 部署生产前请复核 `management.endpoints.web.exposure` 配置
-- 完整的安全相关变量清单见 [`.env.example`](.env.example)
 
-> **当前状态说明**：本项目仍为**教学/演示项目**。已完成一轮缺陷修复（登录码值统一、`checkCode` 补全、短信调用贯通、`ListenService` 真实 Redis 读取 + SSE、`AliServiceImpl` 模板缓存与发送抽象、JMS 队列名统一、`rydr-common` 切面条件化、RedissonClient 注入歧义、端口冲突、熔断优雅降级、RSA 私钥外置、异常处理器、测试类包名等）。
->
-> **仍未实现、升级为可用业务项目需补齐的核心能力**（详见改造计划）：
-> - `service-wallet`：空壳，无充值/支付/余额/流水。
-> - 司机用户服务与收入统计：不存在。
-> - `api-passenger`/`api-driver` 的 `OrderServiceImpl.forecast`：空桩。
-> - 真实短信服务商接入（当前为 console 桩）。
-> - 完整订单状态机、司机选择策略、位置上报、支付闭环、安全与可运维化。
->
-> 完整改造计划见 `.codebuddy/plans/补全不完整业务-实施计划.md`。
+> **企业级差距（后续演进方向）**：当前已满足"业务闭环可用 + 基础安全可运维"，以下属更大议题，详细规划见 [docs/enterprise-gap-analysis.md](docs/enterprise-gap-analysis.md)：配置中心/KMS 全量接入、Flyway 版本化数据迁移、分布式事务 Saga/消息补偿、司机注册/实名独立服务、JMS 订单事件驱动、Micrometer/Prometheus/TraceID 全链路可观测、短信/计价真实服务商密钥配置。
 
 ## 贡献指南
 
