@@ -51,6 +51,7 @@
     <result column="source" property="source" jdbcType="VARCHAR" />
     <result column="use_coupon" property="useCoupon" jdbcType="INTEGER" />
     <result column="memo" property="memo" jdbcType="VARCHAR" />
+    <result column="fare_amount" property="fareAmount" jdbcType="DECIMAL" />
     <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
     <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
   </resultMap>
@@ -63,7 +64,7 @@
     receive_passenger_longitude, receive_passenger_latitude, passenger_getoff_time,
     passenger_getoff_longitude, passenger_getoff_latitude, order_type, service_type, order_channel,
     status, transaction_id, mapping_id, mapping_number, merchant_id, is_evaluate, invoice_type,
-    is_cancel, is_paid, pay_type, cancel_order_type, source, use_coupon, memo, create_time, update_time
+    is_cancel, is_paid, pay_type, cancel_order_type, source, use_coupon, memo, fare_amount, create_time, update_time
   </sql>
 
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
@@ -148,6 +149,7 @@
       <if test="source != null" >source,</if>
       <if test="useCoupon != null" >use_coupon,</if>
       <if test="memo != null" >memo,</if>
+      <if test="fareAmount != null" >fare_amount,</if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="id != null" >#{id,jdbcType=INTEGER},</if>
@@ -199,6 +201,7 @@
       <if test="source != null" >#{source,jdbcType=VARCHAR},</if>
       <if test="useCoupon != null" >#{useCoupon,jdbcType=INTEGER},</if>
       <if test="memo != null" >#{memo,jdbcType=VARCHAR},</if>
+      <if test="fareAmount != null" >#{fareAmount,jdbcType=DECIMAL},</if>
     </trim>
   </insert>
   <update id="updateByPrimaryKeySelective" parameterType="com.rydr.entity.Order" >
@@ -252,6 +255,7 @@
       <if test="source != null" >source = #{source,jdbcType=VARCHAR},</if>
       <if test="useCoupon != null" >use_coupon = #{useCoupon,jdbcType=INTEGER},</if>
       <if test="memo != null" >memo = #{memo,jdbcType=VARCHAR},</if>
+      <if test="fareAmount != null" >fare_amount = #{fareAmount,jdbcType=DECIMAL},</if>
     </set>
     where id = #{id,jdbcType=INTEGER}
   </update>

@@ -1,6 +1,7 @@
 package com.rydr.order.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -8,9 +9,13 @@ import com.rydr.constatnt.BusinessInterfaceStatus;
 import com.rydr.constatnt.OrderStatusEnum;
 import com.rydr.dto.ResponseResult;
 import com.rydr.entity.Order;
+import com.rydr.order.config.ActiveMQTxConfig;
 import com.rydr.order.dao.OrderMapper;
+import com.rydr.order.dao.TxMessageMapper;
+import com.rydr.order.entity.TxMessage;
 import com.rydr.order.feign.WalletServiceClient;
 import com.rydr.order.service.OrderService;
+import com.rydr.common.util.JsonUtil;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -27,6 +32,12 @@ public class OrderServiceImpl implements OrderService {
 
 	@Autowired
 	private OrderMapper mapper;
+
+	@Autowired
+	private TxMessageMapper txMessageMapper;
+
+	@Autowired(required = false)
+	private JmsTemplate jmsTemplate;
 
 	@Autowired(required = false)
 	private WalletServiceClient walletServiceClient;
@@ -137,47 +148,94 @@ public class OrderServiceImpl implements OrderService {
 		order.setStatus(OrderStatusEnum.STATUS_PAY_START.getCode());
 		mapper.updateByPrimaryKeySelective(order);
 
-		if (walletServiceClient == null) {
+		// Reliable-message outbox: write the payment command into tx_message in the
+		// SAME local transaction as the order status update, then hand it to JMS.
+		BigDecimal amount = orderAmount(order);
+		String bizKey = "PAY_" + orderId;
+
+		// Idempotency: if a command for this order is already in flight, do not enqueue twice.
+		if (txMessageMapper.selectByBizKey(bizKey) != null) {
 			result.put("success", false);
 			result.put("code", BusinessInterfaceStatus.FAIL.getCode());
-			result.put("message", "Wallet service is unavailable");
+			result.put("message", "Payment command already in flight for order " + orderId);
 			return result;
 		}
 
+		TxMessage msg = new TxMessage();
+		msg.setBizKey(bizKey);
+		msg.setTopic(ActiveMQTxConfig.QUEUE_PAY_DEDUCT);
+		msg.setPayload(JsonUtil.toJson(Map.of(
+				"orderId", orderId,
+				"passengerId", order.getPassengerInfoId(),
+				"amount", amount)));
+		msg.setStatus(TxMessage.STATUS_INIT);
+		msg.setRetry(0);
+		msg.setNextRetryAt(null);
+		txMessageMapper.insert(msg);
+
+		// Send to ActiveMQ within the transaction; on failure the compensation job
+		// re-delivers the still-INIT message, guaranteeing at-least-once delivery.
+		sendPayCommand(msg);
+
+		result.put("success", true);
+		result.put("code", BusinessInterfaceStatus.SUCCESS.getCode());
+		result.put("message", "Payment accepted; will be settled via reliable message");
+		log.info("Order {} payment command enqueued, amount={}", orderId, amount);
+		return result;
+	}
+
+	/**
+	 * Deliver a payment command to ActiveMQ. On success the outbox row moves to SENT;
+	 * on failure it stays INIT so {@link TxMessageCompensationJob} re-delivers later.
+	 * At-least-once + wallet idempotency (biz_no) guarantee exactly-once effect.
+	 */
+	private void sendPayCommand(TxMessage msg) {
 		try {
-			BigDecimal amount = orderAmount(order);
-			ResponseResult<Void> payResult = walletServiceClient.pay(
-					order.getPassengerInfoId(), orderId, amount);
-			if (payResult != null && payResult.getCode() == BusinessInterfaceStatus.SUCCESS.getCode()) {
-				Map<String, Object> params = new HashMap<>();
-				params.put("id", orderId);
-				params.put("status", OrderStatusEnum.STATUS_PAY_END.getCode());
-				params.put("isPaid", 1);
-				params.put("payType", payType);
-				params.put("transactionId", "WALLET-" + orderId + "-" + System.currentTimeMillis());
-				mapper.payOrder(params);
-				result.put("success", true);
-				result.put("code", BusinessInterfaceStatus.SUCCESS.getCode());
-				result.put("message", "Paid successfully");
-				log.info("Order {} paid successfully, amount={}", orderId, amount);
-			} else {
-				// rollback payment initiated state
-				order.setStatus(OrderStatusEnum.STATUS_DRIVER_TRAVEL_END.getCode());
-				mapper.updateByPrimaryKeySelective(order);
-				result.put("success", false);
-				result.put("code", BusinessInterfaceStatus.FAIL.getCode());
-				result.put("message", payResult == null ? "Wallet returned null" : payResult.getMessage());
-				log.warn("Order {} payment failed via wallet", orderId);
-			}
+			jmsTemplate.convertAndSend(ActiveMQTxConfig.QUEUE_PAY_DEDUCT, msg.getPayload());
+			txMessageMapper.updateStatus(msg.getId(), TxMessage.STATUS_SENT, msg.getRetry(), null);
+			log.info("Payment command delivered for bizKey={}", msg.getBizKey());
 		} catch (Exception e) {
+			log.warn("JMS send failed for bizKey={}, will retry via compensation job: {}",
+					msg.getBizKey(), e.getMessage());
+		}
+	}
+
+	/**
+	 * Called by the wallet-result consumer when the wallet service confirms a payment.
+	 * Marks the order paid and the outbox message DONE.
+	 */
+	public void onPaySuccess(int orderId, int payType, String bizKey) {
+		Map<String, Object> params = new HashMap<>();
+		params.put("id", orderId);
+		params.put("status", OrderStatusEnum.STATUS_PAY_END.getCode());
+		params.put("isPaid", 1);
+		params.put("payType", payType);
+		params.put("transactionId", "WALLET-" + orderId + "-" + System.currentTimeMillis());
+		mapper.payOrder(params);
+		if (bizKey != null) {
+			TxMessage row = txMessageMapper.selectByBizKey(bizKey);
+			if (row != null) {
+				txMessageMapper.markDone(row.getId());
+			}
+		}
+		log.info("Order {} confirmed paid via wallet", orderId);
+	}
+
+	/**
+	 * Called by the wallet-result consumer when the wallet deduction failed.
+	 * Rolls the order status back so the passenger can retry.
+	 */
+	public void onPayFailure(int orderId, String reason, String bizKey) {
+		Order order = mapper.selectByPrimaryKey(orderId);
+		if (order != null && order.getStatus() != null
+				&& order.getStatus() == OrderStatusEnum.STATUS_PAY_START.getCode()) {
 			order.setStatus(OrderStatusEnum.STATUS_DRIVER_TRAVEL_END.getCode());
 			mapper.updateByPrimaryKeySelective(order);
-			result.put("success", false);
-			result.put("code", BusinessInterfaceStatus.FAIL.getCode());
-			result.put("message", "Payment error: " + e.getMessage());
-			log.error("Order {} payment error", orderId, e);
 		}
-		return result;
+		if (bizKey != null) {
+			txMessageMapper.deleteByBizKey(bizKey);
+		}
+		log.warn("Order {} payment failed, status rolled back: {}", orderId, reason);
 	}
 
 	@Override
@@ -204,11 +262,14 @@ public class OrderServiceImpl implements OrderService {
 	}
 
 	/**
-	 * Resolve the fare for an order. The valuation service computes the price at forecast
-	 * time; for now the amount is carried on the order memo as "fare=xxx" that the
-	 * dispatch / trip-end flow populates. Falls back to zero so the call never NPEs.
+	 * Resolve the fare for an order. The structured {@code fare_amount} column (settled
+	 * at trip end) is preferred; it replaces the old fragile memo="fare=xxx" convention.
+	 * Falls back to zero so the call never NPEs.
 	 */
 	private BigDecimal orderAmount(Order order) {
+		if (order.getFareAmount() != null) {
+			return order.getFareAmount();
+		}
 		if (order.getMemo() != null && order.getMemo().startsWith("fare=")) {
 			try {
 				return new BigDecimal(order.getMemo().substring("fare=".length()).trim());
