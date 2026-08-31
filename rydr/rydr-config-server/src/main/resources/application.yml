@@ -7,15 +7,25 @@ spring:
   application:
     name: config-server
 
+  # Activate the native (local filesystem) config backend so the whole project can
+  # run without an external git repository. The native backend loads every module's
+  # {application}-{profile}.yml from the classpath:/config-repo/ directory.
+  profiles:
+    active: native
+
   cloud:
     config:
       server:
-        git:
-          uri: ${CONFIG_GIT_URI:https://github.com/oi/rydr-config-profile}
-          username: ${CONFIG_GIT_USERNAME:}
-          password: ${CONFIG_GIT_PASSWORD:}
-          # Default is seconds; increased because git can be slow
-          timeout: 15
+        native:
+          search-locations: classpath:/config-repo/
+        # Optional git backend: switch to it by setting CONFIG_PROFILE=git and providing
+        # CONFIG_GIT_URI to a reachable private repository, then set search-locations
+        # to {application}-{profile}.yml in that repo. Native is the default for local use.
+#        git:
+#          uri: ${CONFIG_GIT_URI:https://github.com/oi/rydr-config-profile}
+#          username: ${CONFIG_GIT_USERNAME:}
+#          password: ${CONFIG_GIT_PASSWORD:}
+#          timeout: 15
   rabbitmq:
     host: ${RABBITMQ_HOST:localhost}
     port: ${RABBITMQ_PORT:5672}
