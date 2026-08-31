@@ -18,7 +18,7 @@ eureka:
     healthcheck:      enabled: true
     # Set service registry URL
     service-url:
-      defaultZone: http://${EUREKA_USER:admin}:${EUREKA_PASSWORD:changeme}@localhost:7900/eureka/
+      defaultZone: http://${EUREKA_USER:admin}:${EUREKA_PASSWORD:REQUIRED_CHANGEME}@localhost:7900/eureka/
   instance:
     # Heartbeat interval in seconds
     lease-renewal-interval-in-seconds: 1
@@ -31,7 +31,7 @@ eureka:
     instance-id: ${spring.application.name}:${spring.cloud.client.ip-address}:${server:port}
     metadata-map:
       user.name: ${EUREKA_USER:admin}
-      user.password: ${EUREKA_PASSWORD:changeme}
+      user.password: ${EUREKA_PASSWORD:REQUIRED_CHANGEME}
 
 # Admin monitoring
 management:

@@ -6,7 +6,7 @@ spring:
   security:
     user:
       name: ${EUREKA_USER:admin}
-      password: ${EUREKA_PASSWORD:changeme}
+      password: ${EUREKA_PASSWORD:REQUIRED_CHANGEME}
 eureka:
   client:
     register-with-eureka: false
@@ -29,4 +29,4 @@ server:
 eureka:
   client:
     service-url:
-      defaultZone: http://${EUREKA_USER:admin}:${EUREKA_PASSWORD:changeme}@localhost:7900/eureka/
+      defaultZone: http://${EUREKA_USER:admin}:${EUREKA_PASSWORD:REQUIRED_CHANGEME}@localhost:7900/eureka/

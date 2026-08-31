@@ -5,7 +5,7 @@ spring:
   security:
     user:
       name: ${ADMIN_USER:admin}
-      password: ${ADMIN_PASSWORD:changeme}
+      password: ${ADMIN_PASSWORD:REQUIRED_CHANGEME}
   profiles:
     active:
     - 8060
@@ -14,7 +14,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:rydr}?characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
     username: ${DB_USER:root}
-    password: ${DB_PASSWORD:changeme}
+    password: ${DB_PASSWORD:REQUIRED_CHANGEME}
     hikari:
       minimum-idle: 5
       maximum-pool-size: 20
@@ -43,7 +43,7 @@ eureka:
   client:
     # Set service registry URL
     service-url:
-      defaultZone: http://${EUREKA_USER:admin}:${EUREKA_PASSWORD:changeme}@${EUREKA_HOST:eureka-7900}:7900/eureka/
+      defaultZone: http://${EUREKA_USER:admin}:${EUREKA_PASSWORD:REQUIRED_CHANGEME}@${EUREKA_HOST:eureka-7900}:7900/eureka/
 
 
 # Admin monitoring

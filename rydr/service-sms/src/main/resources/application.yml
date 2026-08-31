@@ -2,7 +2,7 @@ spring:
 #  security:
 #    user:
 #      name: ${EUREKA_USER:admin}
-#      password: ${EUREKA_PASSWORD:changeme}
+#      password: ${EUREKA_PASSWORD:REQUIRED_CHANGEME}
   application:
     # Application name
     name: service-sms
@@ -15,7 +15,7 @@ spring:
     # Database username
     username: ${DB_USER:root}
     # Database password
-    password: ${DB_PASSWORD:changeme}
+    password: ${DB_PASSWORD:REQUIRED_CHANGEME}
     # HikariCP connection pool configuration (Boot default pool)
     hikari:
       # Minimum idle connections
@@ -55,11 +55,11 @@ eureka:
     # Set service registry URL
     service-url:
       # Single node registration
-      defaultZone: http://${EUREKA_USER:admin}:${EUREKA_PASSWORD:changeme}@${EUREKA_HOST:eureka-7900}:7900/eureka/
+      defaultZone: http://${EUREKA_USER:admin}:${EUREKA_PASSWORD:REQUIRED_CHANGEME}@${EUREKA_HOST:eureka-7900}:7900/eureka/
     enabled: true
 
       # Multi-node registration (commented out)
-#      defaultZone: http://${EUREKA_USER:admin}:${EUREKA_PASSWORD:changeme}@eureka-7901:7901/eureka/,http://${EUREKA_USER:admin}:${EUREKA_PASSWORD:changeme}@eureka-7902:7902/eureka/,http://${EUREKA_USER:admin}:${EUREKA_PASSWORD:changeme}@eureka-7903:7903/eureka/
+#      defaultZone: http://${EUREKA_USER:admin}:${EUREKA_PASSWORD:REQUIRED_CHANGEME}@eureka-7901:7901/eureka/,http://${EUREKA_USER:admin}:${EUREKA_PASSWORD:REQUIRED_CHANGEME}@eureka-7902:7902/eureka/,http://${EUREKA_USER:admin}:${EUREKA_PASSWORD:REQUIRED_CHANGEME}@eureka-7903:7903/eureka/
   instance:
     virtual-host-name: service-sms
     # Heartbeat interval in seconds
@@ -69,7 +69,7 @@ eureka:
 
     metadata-map:
       user.name: ${EUREKA_USER:admin}
-      user.password: ${EUREKA_PASSWORD:changeme}
+      user.password: ${EUREKA_PASSWORD:REQUIRED_CHANGEME}
 
 # Admin monitoring
 management:

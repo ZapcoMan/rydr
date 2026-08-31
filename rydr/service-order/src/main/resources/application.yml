@@ -21,7 +21,7 @@ spring:
     # Database username
     username: ${DB_USER:root}
     # Database password
-    password: ${DB_PASSWORD:changeme}
+    password: ${DB_PASSWORD:REQUIRED_CHANGEME}
     # HikariCP connection pool configuration (Boot default pool)
     hikari:
       # Minimum idle connections
@@ -49,7 +49,7 @@ eureka:
     enabled: true
     # Set service registry URL
     service-url:
-      defaultZone: http://${EUREKA_USER:admin}:${EUREKA_PASSWORD:changeme}@${EUREKA_HOST:eureka-7900}:7900/eureka/
+      defaultZone: http://${EUREKA_USER:admin}:${EUREKA_PASSWORD:REQUIRED_CHANGEME}@${EUREKA_HOST:eureka-7900}:7900/eureka/
   instance:
     hostname: localhost
 

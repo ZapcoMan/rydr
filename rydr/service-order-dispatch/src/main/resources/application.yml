@@ -15,7 +15,7 @@ eureka:
   client:
     # Set service registry URL
     service-url:
-      defaultZone: http://${EUREKA_USER:admin}:${EUREKA_PASSWORD:changeme}@${EUREKA_HOST:eureka-7900}:7900/eureka/
+      defaultZone: http://${EUREKA_USER:admin}:${EUREKA_PASSWORD:REQUIRED_CHANGEME}@${EUREKA_HOST:eureka-7900}:7900/eureka/
   instance:
     # Heartbeat interval in seconds
     lease-renewal-interval-in-seconds: 1
@@ -30,7 +30,7 @@ eureka:
     instance-id: service-order-dispatch
     metadata-map:
       user.name: ${EUREKA_USER:admin}
-      user.password: ${EUREKA_PASSWORD:changeme}
+      user.password: ${EUREKA_PASSWORD:REQUIRED_CHANGEME}
 
 # Admin monitoring
 management:
