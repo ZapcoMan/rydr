@@ -39,6 +39,11 @@ management:
     web:
       exposure:
         #In yml use double quotes, in properties no quotes needed
-        include: health,info
-
-env: NaN
+        include: health,info,prometheus
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: ${ZIPKIN_ENDPOINT:http://localhost:9411}/api/v2/spans
+    discovery-client-enabled: false

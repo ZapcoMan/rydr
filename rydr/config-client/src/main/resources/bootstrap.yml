@@ -1,5 +1,6 @@
 # Service port
-server:  port: 80
+server:
+  port: 80
 # Application name (config file name pattern: service-verification-code-{profile}.yml)
 spring:
   application:
@@ -39,6 +40,12 @@ management:
     web:
       exposure:
         # In YAML use double quotes; in properties files quotes are not needed
-        include: health,info
-
-env: NaN
+        include: health,info,prometheus
+  # Distributed tracing: Brave -> Zipkin
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: ${ZIPKIN_ENDPOINT:http://localhost:9411}/api/v2/spans
+    discovery-client-enabled: false
