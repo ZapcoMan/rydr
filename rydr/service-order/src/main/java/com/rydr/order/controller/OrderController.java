@@ -1,4 +1,9 @@
-package com.rydr.passenger.controller;
+package com.rydr.order.controller;
+
+import com.rydr.constatnt.BusinessInterfaceStatus;
+import com.rydr.dto.ResponseResult;
+import com.rydr.entity.Order;
+import com.rydr.order.service.OrderService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -9,42 +14,25 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.rydr.dto.ResponseResult;
-import com.rydr.common.dto.order.ForecastRequest;
-import com.rydr.common.dto.order.ForecastResponse;
-import com.rydr.entity.Order;
-import com.rydr.passenger.feign.ServiceForecast;
-
 import java.util.List;
 import java.util.Map;
 
-
 /**
+ * Order lifecycle API (called by api-passenger / api-driver through the gateway).
  *
  * @author oi
- *
  */
 @RestController
 @RequestMapping("/order")
 public class OrderController {
 
 	@Autowired
-	private ServiceForecast serviceForecast;
-
-	@Autowired
-	private com.rydr.passenger.service.OrderService orderService;
-
-	@PostMapping("/forecast")
-	public ResponseResult<ForecastResponse> forecast(@RequestBody ForecastRequest forecastRequest) {
-
-		ResponseResult<ForecastResponse> result = serviceForecast.forecast(forecastRequest);
-
-		return ResponseResult.success(result.getData());
-	}
+	private OrderService orderService;
 
 	@PostMapping("/create")
 	public ResponseResult<Order> create(@RequestBody Order order) {
-		return ResponseResult.success(orderService.createOrder(order));
+		Order created = orderService.createOrder(order);
+		return ResponseResult.success(created);
 	}
 
 	@GetMapping("/number/{orderNumber}")
@@ -58,10 +46,26 @@ public class OrderController {
 		return ResponseResult.success(orderService.listByPassenger(passengerInfoId));
 	}
 
+	@PostMapping("/start/{orderId}")
+	public ResponseResult<Boolean> startTrip(@PathVariable("orderId") int orderId) {
+		return ResponseResult.success(orderService.startTrip(orderId));
+	}
+
+	@PostMapping("/end/{orderId}")
+	public ResponseResult<Boolean> endTrip(@PathVariable("orderId") int orderId) {
+		return ResponseResult.success(orderService.endTrip(orderId));
+	}
+
 	@PostMapping("/pay/{orderId}")
 	public ResponseResult<Map<String, Object>> pay(@PathVariable("orderId") int orderId,
-													@RequestParam("payType") int payType) {
-		return ResponseResult.success(orderService.pay(orderId, payType));
+												   @RequestParam("payType") int payType) {
+		Map<String, Object> result = orderService.pay(orderId, payType);
+		boolean ok = Boolean.TRUE.equals(result.get("success"));
+		int code = ok ? BusinessInterfaceStatus.SUCCESS.getCode() : BusinessInterfaceStatus.FAIL.getCode();
+		return new ResponseResult<Map<String, Object>>()
+				.setCode(code)
+				.setMessage((String) result.getOrDefault("message", ""))
+				.setData(result);
 	}
 
 	@PostMapping("/cancel/{orderId}")
