@@ -1,0 +1,8 @@
+# ============================================================
+# service-jms-produce (dev) — centralized config from rydr-config-server
+# ============================================================
+spring:
+  activemq:
+    broker-url: tcp://${ACTIVEMQ_HOST:127.0.0.1}:${ACTIVEMQ_PORT:61616}
+    user: ${ACTIVEMQ_USER:admin}
+    password: ${ACTIVEMQ_PASSWORD:REQUIRED_CHANGEME}

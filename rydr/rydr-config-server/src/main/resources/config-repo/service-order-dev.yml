@@ -1,0 +1,22 @@
+# ============================================================
+# service-order (dev) — centralized config from rydr-config-server
+# ============================================================
+spring:
+  data:
+    redis:
+      host: ${REDIS_HOST:127.0.0.1}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+  datasource:
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:rydr}?characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
+    username: ${DB_USER:root}
+    password: ${DB_PASSWORD:REQUIRED_CHANGEME}
+  activemq:
+    broker-url: tcp://${ACTIVEMQ_HOST:127.0.0.1}:${ACTIVEMQ_PORT:61616}
+    user: ${ACTIVEMQ_USER:admin}
+    password: ${ACTIVEMQ_PASSWORD:REQUIRED_CHANGEME}
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://${EUREKA_USER:admin}:${EUREKA_PASSWORD:REQUIRED_CHANGEME}@${EUREKA_HOST:eureka-7900}:7900/eureka/

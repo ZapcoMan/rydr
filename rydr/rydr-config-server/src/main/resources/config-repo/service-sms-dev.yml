@@ -1,0 +1,17 @@
+# ============================================================
+# service-sms (dev) — centralized config from rydr-config-server
+# ============================================================
+spring:
+  datasource:
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME_THREE:rydr-three}?characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
+    username: ${DB_USER:root}
+    password: ${DB_PASSWORD:REQUIRED_CHANGEME}
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://${EUREKA_USER:admin}:${EUREKA_PASSWORD:REQUIRED_CHANGEME}@${EUREKA_HOST:eureka-7900}:7900/eureka/
+  instance:
+    metadata-map:
+      user.name: ${EUREKA_USER:admin}
+      user.password: ${EUREKA_PASSWORD:REQUIRED_CHANGEME}
