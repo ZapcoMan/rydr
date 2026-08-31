@@ -3,17 +3,91 @@
 <mapper namespace="com.rydr.order.dao.OrderMapper" >
   <resultMap id="BaseResultMap" type="com.rydr.entity.Order" >
     <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="order_number" property="orderNumber" jdbcType="VARCHAR" />
+    <result column="passenger_info_id" property="passengerInfoId" jdbcType="INTEGER" />
+    <result column="passenger_phone" property="passengerPhone" jdbcType="VARCHAR" />
+    <result column="device_code" property="deviceCode" jdbcType="VARCHAR" />
+    <result column="driver_id" property="driverId" jdbcType="INTEGER" />
+    <result column="driver_status" property="driverStatus" jdbcType="INTEGER" />
+    <result column="driver_phone" property="driverPhone" jdbcType="VARCHAR" />
+    <result column="car_id" property="carId" jdbcType="INTEGER" />
+    <result column="plate_number" property="plateNumber" jdbcType="VARCHAR" />
+    <result column="user_longitude" property="userLongitude" jdbcType="VARCHAR" />
+    <result column="user_latitude" property="userLatitude" jdbcType="VARCHAR" />
+    <result column="start_longitude" property="startLongitude" jdbcType="VARCHAR" />
+    <result column="start_latitude" property="startLatitude" jdbcType="VARCHAR" />
+    <result column="start_address" property="startAddress" jdbcType="VARCHAR" />
+    <result column="end_address" property="endAddress" jdbcType="VARCHAR" />
+    <result column="start_time" property="startTime" jdbcType="TIMESTAMP" />
+    <result column="order_start_time" property="orderStartTime" jdbcType="TIMESTAMP" />
+    <result column="end_longitude" property="endLongitude" jdbcType="VARCHAR" />
+    <result column="end_latitude" property="endLatitude" jdbcType="VARCHAR" />
+    <result column="driver_grab_time" property="driverGrabTime" jdbcType="TIMESTAMP" />
+    <result column="driver_start_time" property="driverStartTime" jdbcType="TIMESTAMP" />
+    <result column="driver_arrived_time" property="driverArrivedTime" jdbcType="TIMESTAMP" />
+    <result column="pick_up_passenger_longitude" property="pickUpPassengerLongitude" jdbcType="VARCHAR" />
+    <result column="pick_up_passenger_latitude" property="pickUpPassengerLatitude" jdbcType="VARCHAR" />
+    <result column="pick_up_passenger_address" property="pickUpPassengerAddress" jdbcType="VARCHAR" />
+    <result column="receive_passenger_time" property="receivePassengerTime" jdbcType="TIMESTAMP" />
+    <result column="receive_passenger_longitude" property="receivePassengerLongitude" jdbcType="VARCHAR" />
+    <result column="receive_passenger_latitude" property="receivePassengerLatitude" jdbcType="VARCHAR" />
+    <result column="passenger_getoff_time" property="passengerGetoffTime" jdbcType="TIMESTAMP" />
+    <result column="passenger_getoff_longitude" property="passengerGetoffLongitude" jdbcType="VARCHAR" />
+    <result column="passenger_getoff_latitude" property="passengerGetoffLatitude" jdbcType="VARCHAR" />
+    <result column="order_type" property="orderType" jdbcType="INTEGER" />
+    <result column="service_type" property="serviceType" jdbcType="INTEGER" />
+    <result column="order_channel" property="orderChannel" jdbcType="INTEGER" />
     <result column="status" property="status" jdbcType="INTEGER" />
+    <result column="transaction_id" property="transactionId" jdbcType="VARCHAR" />
+    <result column="mapping_id" property="mappingId" jdbcType="VARCHAR" />
+    <result column="mapping_number" property="mappingNumber" jdbcType="VARCHAR" />
+    <result column="merchant_id" property="merchantId" jdbcType="VARCHAR" />
+    <result column="is_evaluate" property="isEvaluate" jdbcType="INTEGER" />
+    <result column="invoice_type" property="invoiceType" jdbcType="INTEGER" />
+    <result column="is_cancel" property="isCancel" jdbcType="INTEGER" />
+    <result column="is_paid" property="isPaid" jdbcType="INTEGER" />
+    <result column="pay_type" property="payType" jdbcType="INTEGER" />
+    <result column="cancel_order_type" property="cancelOrderType" jdbcType="INTEGER" />
+    <result column="source" property="source" jdbcType="VARCHAR" />
+    <result column="use_coupon" property="useCoupon" jdbcType="INTEGER" />
+    <result column="memo" property="memo" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
   </resultMap>
   <sql id="Base_Column_List" >
-    id, status
+    id, order_number, passenger_info_id, passenger_phone, device_code, driver_id, driver_status,
+    driver_phone, car_id, plate_number, user_longitude, user_latitude, start_longitude, start_latitude,
+    start_address, end_address, start_time, order_start_time, end_longitude, end_latitude,
+    driver_grab_time, driver_start_time, driver_arrived_time, pick_up_passenger_longitude,
+    pick_up_passenger_latitude, pick_up_passenger_address, receive_passenger_time,
+    receive_passenger_longitude, receive_passenger_latitude, passenger_getoff_time,
+    passenger_getoff_longitude, passenger_getoff_latitude, order_type, service_type, order_channel,
+    status, transaction_id, mapping_id, mapping_number, merchant_id, is_evaluate, invoice_type,
+    is_cancel, is_paid, pay_type, cancel_order_type, source, use_coupon, memo, create_time, update_time
   </sql>
+
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
-    select 
+    select
     <include refid="Base_Column_List" />
     from tbl_order
     where id = #{id,jdbcType=INTEGER}
   </select>
+
+  <select id="selectByOrderNumber" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from tbl_order
+    where order_number = #{orderNumber,jdbcType=VARCHAR}
+  </select>
+
+  <select id="selectByPassenger" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select
+    <include refid="Base_Column_List" />
+    from tbl_order
+    where passenger_info_id = #{passengerInfoId,jdbcType=INTEGER}
+    order by create_time desc
+  </select>
+
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
     delete from tbl_order
     where id = #{id,jdbcType=INTEGER}
@@ -25,34 +99,180 @@
   <insert id="insertSelective" parameterType="com.rydr.entity.Order" >
     insert into tbl_order
     <trim prefix="(" suffix=")" suffixOverrides="," >
-      <if test="id != null" >
-        id,
-      </if>
-      <if test="status != null" >
-        status,
-      </if>
+      <if test="id != null" >id,</if>
+      <if test="orderNumber != null" >order_number,</if>
+      <if test="passengerInfoId != null" >passenger_info_id,</if>
+      <if test="passengerPhone != null" >passenger_phone,</if>
+      <if test="deviceCode != null" >device_code,</if>
+      <if test="driverId != null" >driver_id,</if>
+      <if test="driverStatus != null" >driver_status,</if>
+      <if test="driverPhone != null" >driver_phone,</if>
+      <if test="carId != null" >car_id,</if>
+      <if test="plateNumber != null" >plate_number,</if>
+      <if test="userLongitude != null" >user_longitude,</if>
+      <if test="userLatitude != null" >user_latitude,</if>
+      <if test="startLongitude != null" >start_longitude,</if>
+      <if test="startLatitude != null" >start_latitude,</if>
+      <if test="startAddress != null" >start_address,</if>
+      <if test="endAddress != null" >end_address,</if>
+      <if test="startTime != null" >start_time,</if>
+      <if test="orderStartTime != null" >order_start_time,</if>
+      <if test="endLongitude != null" >end_longitude,</if>
+      <if test="endLatitude != null" >end_latitude,</if>
+      <if test="driverGrabTime != null" >driver_grab_time,</if>
+      <if test="driverStartTime != null" >driver_start_time,</if>
+      <if test="driverArrivedTime != null" >driver_arrived_time,</if>
+      <if test="pickUpPassengerLongitude != null" >pick_up_passenger_longitude,</if>
+      <if test="pickUpPassengerLatitude != null" >pick_up_passenger_latitude,</if>
+      <if test="pickUpPassengerAddress != null" >pick_up_passenger_address,</if>
+      <if test="receivePassengerTime != null" >receive_passenger_time,</if>
+      <if test="receivePassengerLongitude != null" >receive_passenger_longitude,</if>
+      <if test="receivePassengerLatitude != null" >receive_passenger_latitude,</if>
+      <if test="passengerGetoffTime != null" >passenger_getoff_time,</if>
+      <if test="passengerGetoffLongitude != null" >passenger_getoff_longitude,</if>
+      <if test="passengerGetoffLatitude != null" >passenger_getoff_latitude,</if>
+      <if test="orderType != null" >order_type,</if>
+      <if test="serviceType != null" >service_type,</if>
+      <if test="orderChannel != null" >order_channel,</if>
+      <if test="status != null" >status,</if>
+      <if test="transactionId != null" >transaction_id,</if>
+      <if test="mappingId != null" >mapping_id,</if>
+      <if test="mappingNumber != null" >mapping_number,</if>
+      <if test="merchantId != null" >merchant_id,</if>
+      <if test="isEvaluate != null" >is_evaluate,</if>
+      <if test="invoiceType != null" >invoice_type,</if>
+      <if test="isCancel != null" >is_cancel,</if>
+      <if test="isPaid != null" >is_paid,</if>
+      <if test="payType != null" >pay_type,</if>
+      <if test="cancelOrderType != null" >cancel_order_type,</if>
+      <if test="source != null" >source,</if>
+      <if test="useCoupon != null" >use_coupon,</if>
+      <if test="memo != null" >memo,</if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
-      <if test="id != null" >
-        #{id,jdbcType=INTEGER},
-      </if>
-      <if test="status != null" >
-        #{status,jdbcType=INTEGER},
-      </if>
+      <if test="id != null" >#{id,jdbcType=INTEGER},</if>
+      <if test="orderNumber != null" >#{orderNumber,jdbcType=VARCHAR},</if>
+      <if test="passengerInfoId != null" >#{passengerInfoId,jdbcType=INTEGER},</if>
+      <if test="passengerPhone != null" >#{passengerPhone,jdbcType=VARCHAR},</if>
+      <if test="deviceCode != null" >#{deviceCode,jdbcType=VARCHAR},</if>
+      <if test="driverId != null" >#{driverId,jdbcType=INTEGER},</if>
+      <if test="driverStatus != null" >#{driverStatus,jdbcType=INTEGER},</if>
+      <if test="driverPhone != null" >#{driverPhone,jdbcType=VARCHAR},</if>
+      <if test="carId != null" >#{carId,jdbcType=INTEGER},</if>
+      <if test="plateNumber != null" >#{plateNumber,jdbcType=VARCHAR},</if>
+      <if test="userLongitude != null" >#{userLongitude,jdbcType=VARCHAR},</if>
+      <if test="userLatitude != null" >#{userLatitude,jdbcType=VARCHAR},</if>
+      <if test="startLongitude != null" >#{startLongitude,jdbcType=VARCHAR},</if>
+      <if test="startLatitude != null" >#{startLatitude,jdbcType=VARCHAR},</if>
+      <if test="startAddress != null" >#{startAddress,jdbcType=VARCHAR},</if>
+      <if test="endAddress != null" >#{endAddress,jdbcType=VARCHAR},</if>
+      <if test="startTime != null" >#{startTime,jdbcType=TIMESTAMP},</if>
+      <if test="orderStartTime != null" >#{orderStartTime,jdbcType=TIMESTAMP},</if>
+      <if test="endLongitude != null" >#{endLongitude,jdbcType=VARCHAR},</if>
+      <if test="endLatitude != null" >#{endLatitude,jdbcType=VARCHAR},</if>
+      <if test="driverGrabTime != null" >#{driverGrabTime,jdbcType=TIMESTAMP},</if>
+      <if test="driverStartTime != null" >#{driverStartTime,jdbcType=TIMESTAMP},</if>
+      <if test="driverArrivedTime != null" >#{driverArrivedTime,jdbcType=TIMESTAMP},</if>
+      <if test="pickUpPassengerLongitude != null" >#{pickUpPassengerLongitude,jdbcType=VARCHAR},</if>
+      <if test="pickUpPassengerLatitude != null" >#{pickUpPassengerLatitude,jdbcType=VARCHAR},</if>
+      <if test="pickUpPassengerAddress != null" >#{pickUpPassengerAddress,jdbcType=VARCHAR},</if>
+      <if test="receivePassengerTime != null" >#{receivePassengerTime,jdbcType=TIMESTAMP},</if>
+      <if test="receivePassengerLongitude != null" >#{receivePassengerLongitude,jdbcType=VARCHAR},</if>
+      <if test="receivePassengerLatitude != null" >#{receivePassengerLatitude,jdbcType=VARCHAR},</if>
+      <if test="passengerGetoffTime != null" >#{passengerGetoffTime,jdbcType=TIMESTAMP},</if>
+      <if test="passengerGetoffLongitude != null" >#{passengerGetoffLongitude,jdbcType=VARCHAR},</if>
+      <if test="passengerGetoffLatitude != null" >#{passengerGetoffLatitude,jdbcType=VARCHAR},</if>
+      <if test="orderType != null" >#{orderType,jdbcType=INTEGER},</if>
+      <if test="serviceType != null" >#{serviceType,jdbcType=INTEGER},</if>
+      <if test="orderChannel != null" >#{orderChannel,jdbcType=INTEGER},</if>
+      <if test="status != null" >#{status,jdbcType=INTEGER},</if>
+      <if test="transactionId != null" >#{transactionId,jdbcType=VARCHAR},</if>
+      <if test="mappingId != null" >#{mappingId,jdbcType=VARCHAR},</if>
+      <if test="mappingNumber != null" >#{mappingNumber,jdbcType=VARCHAR},</if>
+      <if test="merchantId != null" >#{merchantId,jdbcType=VARCHAR},</if>
+      <if test="isEvaluate != null" >#{isEvaluate,jdbcType=INTEGER},</if>
+      <if test="invoiceType != null" >#{invoiceType,jdbcType=INTEGER},</if>
+      <if test="isCancel != null" >#{isCancel,jdbcType=INTEGER},</if>
+      <if test="isPaid != null" >#{isPaid,jdbcType=INTEGER},</if>
+      <if test="payType != null" >#{payType,jdbcType=INTEGER},</if>
+      <if test="cancelOrderType != null" >#{cancelOrderType,jdbcType=INTEGER},</if>
+      <if test="source != null" >#{source,jdbcType=VARCHAR},</if>
+      <if test="useCoupon != null" >#{useCoupon,jdbcType=INTEGER},</if>
+      <if test="memo != null" >#{memo,jdbcType=VARCHAR},</if>
     </trim>
   </insert>
   <update id="updateByPrimaryKeySelective" parameterType="com.rydr.entity.Order" >
     update tbl_order
     <set >
-      <if test="status != null" >
-        status = #{status,jdbcType=INTEGER},
-      </if>
+      <if test="orderNumber != null" >order_number = #{orderNumber,jdbcType=VARCHAR},</if>
+      <if test="passengerInfoId != null" >passenger_info_id = #{passengerInfoId,jdbcType=INTEGER},</if>
+      <if test="passengerPhone != null" >passenger_phone = #{passengerPhone,jdbcType=VARCHAR},</if>
+      <if test="deviceCode != null" >device_code = #{deviceCode,jdbcType=VARCHAR},</if>
+      <if test="driverId != null" >driver_id = #{driverId,jdbcType=INTEGER},</if>
+      <if test="driverStatus != null" >driver_status = #{driverStatus,jdbcType=INTEGER},</if>
+      <if test="driverPhone != null" >driver_phone = #{driverPhone,jdbcType=VARCHAR},</if>
+      <if test="carId != null" >car_id = #{carId,jdbcType=INTEGER},</if>
+      <if test="plateNumber != null" >plate_number = #{plateNumber,jdbcType=VARCHAR},</if>
+      <if test="userLongitude != null" >user_longitude = #{userLongitude,jdbcType=VARCHAR},</if>
+      <if test="userLatitude != null" >user_latitude = #{userLatitude,jdbcType=VARCHAR},</if>
+      <if test="startLongitude != null" >start_longitude = #{startLongitude,jdbcType=VARCHAR},</if>
+      <if test="startLatitude != null" >start_latitude = #{startLatitude,jdbcType=VARCHAR},</if>
+      <if test="startAddress != null" >start_address = #{startAddress,jdbcType=VARCHAR},</if>
+      <if test="endAddress != null" >end_address = #{endAddress,jdbcType=VARCHAR},</if>
+      <if test="startTime != null" >start_time = #{startTime,jdbcType=TIMESTAMP},</if>
+      <if test="orderStartTime != null" >order_start_time = #{orderStartTime,jdbcType=TIMESTAMP},</if>
+      <if test="endLongitude != null" >end_longitude = #{endLongitude,jdbcType=VARCHAR},</if>
+      <if test="endLatitude != null" >end_latitude = #{endLatitude,jdbcType=VARCHAR},</if>
+      <if test="driverGrabTime != null" >driver_grab_time = #{driverGrabTime,jdbcType=TIMESTAMP},</if>
+      <if test="driverStartTime != null" >driver_start_time = #{driverStartTime,jdbcType=TIMESTAMP},</if>
+      <if test="driverArrivedTime != null" >driver_arrived_time = #{driverArrivedTime,jdbcType=TIMESTAMP},</if>
+      <if test="pickUpPassengerLongitude != null" >pick_up_passenger_longitude = #{pickUpPassengerLongitude,jdbcType=VARCHAR},</if>
+      <if test="pickUpPassengerLatitude != null" >pick_up_passenger_latitude = #{pickUpPassengerLatitude,jdbcType=VARCHAR},</if>
+      <if test="pickUpPassengerAddress != null" >pick_up_passenger_address = #{pickUpPassengerAddress,jdbcType=VARCHAR},</if>
+      <if test="receivePassengerTime != null" >receive_passenger_time = #{receivePassengerTime,jdbcType=TIMESTAMP},</if>
+      <if test="receivePassengerLongitude != null" >receive_passenger_longitude = #{receivePassengerLongitude,jdbcType=VARCHAR},</if>
+      <if test="receivePassengerLatitude != null" >receive_passenger_latitude = #{receivePassengerLatitude,jdbcType=VARCHAR},</if>
+      <if test="passengerGetoffTime != null" >passenger_getoff_time = #{passengerGetoffTime,jdbcType=TIMESTAMP},</if>
+      <if test="passengerGetoffLongitude != null" >passenger_getoff_longitude = #{passengerGetoffLongitude,jdbcType=VARCHAR},</if>
+      <if test="passengerGetoffLatitude != null" >passenger_getoff_latitude = #{passengerGetoffLatitude,jdbcType=VARCHAR},</if>
+      <if test="orderType != null" >order_type = #{orderType,jdbcType=INTEGER},</if>
+      <if test="serviceType != null" >service_type = #{serviceType,jdbcType=INTEGER},</if>
+      <if test="orderChannel != null" >order_channel = #{orderChannel,jdbcType=INTEGER},</if>
+      <if test="status != null" >status = #{status,jdbcType=INTEGER},</if>
+      <if test="transactionId != null" >transaction_id = #{transactionId,jdbcType=VARCHAR},</if>
+      <if test="mappingId != null" >mapping_id = #{mappingId,jdbcType=VARCHAR},</if>
+      <if test="mappingNumber != null" >mapping_number = #{mappingNumber,jdbcType=VARCHAR},</if>
+      <if test="merchantId != null" >merchant_id = #{merchantId,jdbcType=VARCHAR},</if>
+      <if test="isEvaluate != null" >is_evaluate = #{isEvaluate,jdbcType=INTEGER},</if>
+      <if test="invoiceType != null" >invoice_type = #{invoiceType,jdbcType=INTEGER},</if>
+      <if test="isCancel != null" >is_cancel = #{isCancel,jdbcType=INTEGER},</if>
+      <if test="isPaid != null" >is_paid = #{isPaid,jdbcType=INTEGER},</if>
+      <if test="payType != null" >pay_type = #{payType,jdbcType=INTEGER},</if>
+      <if test="cancelOrderType != null" >cancel_order_type = #{cancelOrderType,jdbcType=INTEGER},</if>
+      <if test="source != null" >source = #{source,jdbcType=VARCHAR},</if>
+      <if test="useCoupon != null" >use_coupon = #{useCoupon,jdbcType=INTEGER},</if>
+      <if test="memo != null" >memo = #{memo,jdbcType=VARCHAR},</if>
     </set>
     where id = #{id,jdbcType=INTEGER}
   </update>
   <update id="updateByPrimaryKey" parameterType="com.rydr.entity.Order" >
     update tbl_order
     set status = #{status,jdbcType=INTEGER}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="payOrder" parameterType="java.util.Map" >
+    update tbl_order
+    set status = #{status,jdbcType=INTEGER},
+        is_paid = #{isPaid,jdbcType=INTEGER},
+        pay_type = #{payType,jdbcType=INTEGER},
+        transaction_id = #{transactionId,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="cancelOrder" parameterType="java.util.Map" >
+    update tbl_order
+    set status = #{status,jdbcType=INTEGER},
+        is_cancel = #{isCancel,jdbcType=INTEGER},
+        cancel_order_type = #{cancelOrderType,jdbcType=INTEGER}
     where id = #{id,jdbcType=INTEGER}
   </update>
 </mapper>
