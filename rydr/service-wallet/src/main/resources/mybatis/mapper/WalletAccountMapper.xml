@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.rydr.wallet.mapper.WalletAccountMapper" >
+
+  <resultMap id="BaseResultMap" type="com.rydr.wallet.entity.WalletAccount" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="passenger_info_id" property="passengerInfoId" jdbcType="INTEGER" />
+    <result column="capital" property="capital" jdbcType="DECIMAL" />
+    <result column="give_fee" property="giveFee" jdbcType="DECIMAL" />
+    <result column="freeze_capital" property="freezeCapital" jdbcType="DECIMAL" />
+    <result column="freeze_give_fee" property="freezeGiveFee" jdbcType="DECIMAL" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    id, passenger_info_id, capital, give_fee, freeze_capital, freeze_give_fee, create_time, update_time
+  </sql>
+
+  <select id="selectByPassengerId" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select
+    <include refid="Base_Column_List" />
+    from tbl_passenger_wallet
+    where passenger_info_id = #{passengerInfoId}
+  </select>
+
+  <insert id="insert" parameterType="com.rydr.wallet.entity.WalletAccount" >
+    insert into tbl_passenger_wallet (passenger_info_id, capital, give_fee, freeze_capital, freeze_give_fee, create_time, update_time)
+    values (#{passengerInfoId}, #{capital}, #{giveFee}, #{freezeCapital}, #{freezeGiveFee}, #{createTime}, #{updateTime})
+  </insert>
+
+  <!-- Concurrency-safe deduction: only succeeds when the current balance is enough. -->
+  <update id="deductCapital" >
+    update tbl_passenger_wallet
+    set capital = capital - #{amount},
+        update_time = now()
+    where passenger_info_id = #{passengerInfoId}
+      and capital >= #{amount}
+  </update>
+
+  <update id="addCapital" >
+    update tbl_passenger_wallet
+    set capital = capital + #{amount},
+        update_time = now()
+    where passenger_info_id = #{passengerInfoId}
+  </update>
+
+</mapper>
