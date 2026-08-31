@@ -1,6 +1,7 @@
 package com.rydr.passenger.service.impl;
 
 import com.rydr.common.constant.IdentityConstant;
+import com.rydr.constatnt.BusinessInterfaceStatus;
 import com.rydr.dto.ResponseResult;
 import com.rydr.common.dto.passengeruser.LoginRequest;
 import com.rydr.common.util.JwtUtil;
@@ -33,18 +34,29 @@ public class AuthServiceImpl implements AuthService {
         codeVerifyRequest.setIdentity(IdentityConstant.PASSENGER);
 
         ResponseResult responseResult = serviceVerificationCodeFeignClient.verify(codeVerifyRequest);
-        if(responseResult.getCode() != 1){
-            return ResponseResult.fail(responseResult.getCode(),responseResult.getMessage());
+        // ResponseResult uses BusinessInterfaceStatus: SUCCESS=0 / FAIL=1.
+        // Both service-verification-code#verify and service-passenger-user#login return
+        // ResponseResult.success(...) on success, i.e. code == 0. Never compare against 1 here.
+        if(responseResult == null || responseResult.getCode() != BusinessInterfaceStatus.SUCCESS.getCode()){
+            return ResponseResult.fail(
+                    responseResult == null ? BusinessInterfaceStatus.FAIL.getCode() : responseResult.getCode(),
+                    responseResult == null ? "Verification code service returned no response" : responseResult.getMessage());
         }
 
         // Passenger user login
         LoginRequest loginRequest = new LoginRequest();
         loginRequest.setPassengerPhone(passengerPhone);
         ResponseResult<PassengerUserInfo> passengerUserInfoResponseResult = servicePassengerUserFeignClient.login(loginRequest);
-        if(passengerUserInfoResponseResult.getCode() != 1){
-            return ResponseResult.fail(passengerUserInfoResponseResult.getCode(),passengerUserInfoResponseResult.getMessage());
+        if(passengerUserInfoResponseResult == null
+                || passengerUserInfoResponseResult.getCode() != BusinessInterfaceStatus.SUCCESS.getCode()){
+            return ResponseResult.fail(
+                    passengerUserInfoResponseResult == null ? BusinessInterfaceStatus.FAIL.getCode() : passengerUserInfoResponseResult.getCode(),
+                    passengerUserInfoResponseResult == null ? "Passenger user service returned no response" : passengerUserInfoResponseResult.getMessage());
         }
         PassengerUserInfo passengerUserInfo = passengerUserInfoResponseResult.getData();
+        if(passengerUserInfo == null){
+            return ResponseResult.fail(BusinessInterfaceStatus.FAIL.getCode(), "Passenger user not found");
+        }
 
         // Distribute token
         long passengerId = passengerUserInfo.getId();
