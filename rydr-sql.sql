@@ -2072,7 +2072,9 @@ CREATE TABLE `passenger_user_info` (
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'creation time',
   `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'update time',
   PRIMARY KEY (`id`),
-  KEY `INX_PHONE` (`passenger_phone`)
+  -- Must be UNIQUE: login() inserts the user on first login and relies on the duplicate key
+  -- error to detect that a concurrent request won the race, then re-reads the existing row.
+  UNIQUE KEY `UK_PHONE` (`passenger_phone`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='passenger user info table';
 
 DROP TABLE IF EXISTS `service_sms_record`;
