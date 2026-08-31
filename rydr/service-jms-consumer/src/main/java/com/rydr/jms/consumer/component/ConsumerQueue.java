@@ -1,5 +1,6 @@
 package com.rydr.jms.consumer.component;
 
+import com.rydr.jms.consumer.config.ActiveMQConfig;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Component;
 
@@ -16,7 +17,7 @@ public class ConsumerQueue {
      * Use JmsListener to configure the queue monitored by the consumer, where text is the received message
      * @param text
      */
-   @JmsListener(destination = "1",containerFactory = "jmsListenerContainerQueue")
+   @JmsListener(destination = ActiveMQConfig.QUEUE_NAME,containerFactory = "jmsListenerContainerQueue")
    public void receiveQueue1(TextMessage text, Session session) throws JMSException {
        try {
 //           int i = 1/0;
@@ -39,7 +40,7 @@ public class ConsumerQueue {
 
    }
 
-//    @JmsListener(destination = "ActiveMQQueue")
+//    @JmsListener(destination = ActiveMQConfig.QUEUE_NAME)
 //    public void receiveQueue2(String text) {
 //        System.out.println("Consumer received queue2 message: "+text);
 //    }
