@@ -1,4 +1,4 @@
-package com.rydr.wallet;
+package com.rydr.jms.consumer;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -7,7 +7,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
-public class ServiceWalletApplicationTests {
+public class ServiceJmsConsumerApplicationTests {
 
 	@Test
 	public void contextLoads() {

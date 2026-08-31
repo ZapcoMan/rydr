@@ -18,7 +18,9 @@ public class AndroidRequestTest {
 	@Test
 	public void userRequest() {
 
-		String secret = "test-secret-key";
+		// Must match RequestCheckFilter's ZUUL_SECRET (same property, same default),
+		// otherwise the signature computed here can never be verified by the gateway.
+		String secret = System.getProperty("ZUUL_SECRET", "default-secret");
 
 		RestTemplate userTemplate = new RestTemplate();
 
