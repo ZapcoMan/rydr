@@ -1,0 +1,8 @@
+# ============================================================
+# eureka (dev) — centralized config from rydr-config-server
+# ============================================================
+spring:
+  security:
+    user:
+      name: ${EUREKA_USER:admin}
+      password: ${EUREKA_PASSWORD:REQUIRED_CHANGEME}
