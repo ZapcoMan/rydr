@@ -13,5 +13,15 @@ public interface OrderService {
 	 * @param forecastRequest
 	 * @return
 	 */
-	public Double forecast(ForecastRequest forecastRequest) ;
+	public Double forecast(ForecastRequest forecastRequest);
+
+	/**
+	 * Driver starts the trip (passenger boarded).
+	 */
+	Boolean startTrip(int orderId);
+
+	/**
+	 * Driver ends the trip (passenger dropped off, unpaid).
+	 */
+	Boolean endTrip(int orderId);
 }
