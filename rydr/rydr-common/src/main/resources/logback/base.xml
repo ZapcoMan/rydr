@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Shared structured-logging base for every rydr microservice.
+
+    Usage in a module's logback-spring.xml:
+        <include resource="logback/base.xml"/>
+        <root level="INFO">
+            <appender-ref ref="CONSOLE-JSON"/>
+        </root>
+
+    The LogstashEncoder automatically picks up traceId/spanId from the
+    Micrometer Tracing (Brave) MDC context, so every line emitted during a
+    request carries its correlation identifiers for centralized collection.
+-->
+<included>
+
+    <property name="LOG_PATTERN_CONSOLE"
+              value="%clr(%d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX}){faint} %clr(%5p) %clr(${PID:- }){magenta} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n"/>
+
+    <!-- Pretty (human-readable) console appender: used when JSON_LOG=false -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${LOG_PATTERN_CONSOLE}</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- Structured JSON console appender: used when JSON_LOG=true (default) -->
+    <appender name="CONSOLE-JSON" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <includeMdcKeyName>traceId</includeMdcKeyName>
+            <includeMdcKeyName>spanId</includeMdcKeyName>
+            <includeMdcKeyName>parentId</includeMdcKeyName>
+            <customFields>{"app":"${APP_NAME:-rydr}"}</customFields>
+            <fieldNames>
+                <timestamp>ts</timestamp>
+                <level>level</level>
+                <logger>logger</logger>
+                <message>msg</message>
+                <thread>thread</thread>
+            </fieldNames>
+        </encoder>
+    </appender>
+
+    <!--
+        Default behaviour: emit structured JSON so a log shipper (Fluent Bit /
+        Filebeat / Docker json-file driver) can ingest it directly. Set
+        JSON_LOG=false to fall back to the traditional coloured pattern.
+    -->
+    <springProfile name="!plain-log">
+        <root level="INFO">
+            <appender-ref ref="CONSOLE-JSON"/>
+        </root>
+    </springProfile>
+
+    <springProfile name="plain-log">
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+    </springProfile>
+
+</included>
