@@ -26,24 +26,11 @@ public class TestController {
 		return "api-driver-hello:"+port;
 	}
 
-	@RequestMapping("/admin")
-	public String admin() {
-	    StringBuilder b = new StringBuilder();
-        for (int i = 0; i < 500; i++) {
-            byte[] by = new byte[1024 * 1024 * 50];//50m
-
-            b.append(by);
-
-
-        }
-        System.out.println("debug");
-        try {
-            Thread.sleep(100000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        return "api-driver-admin:"+port;
-	}
+	/**
+	 * Removed: the previous implementation allocated 500 x 50MB in a loop, which always brings
+	 * the JVM down with an OutOfMemoryError, and then blocked the request thread for 100s.
+	 * Use /actuator/heapdump from a restricted network if a heap dump is really needed.
+	 */
 
 	@RequestMapping("/token")
 	public String cookie(HttpServletRequest req) {
