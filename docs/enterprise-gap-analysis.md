@@ -4,7 +4,7 @@
 >
 > 扫描方式：主代理逐一 `read_file`，不使用任何子代理 / 多线程并行（依据用户要求与历史经验，并行扫描会导致工具卡死）。
 >
-> 关联文档：[架构指南](architecture.md) · [模块指南](modules.md) · [说明文件](../README.md)
+> 关联文档：[架构指南](architecture.md) · [模块指南](modules.md) · [运维手册](operations.md) · [说明文件](../README.md)
 
 ---
 
@@ -118,10 +118,15 @@
 - **企业级要求**：流水线 + 单测 / 集成测试 + 覆盖率门禁 + 镜像化。
 - **建议**：GitHub Actions / Jenkins 流水线；`testcontainers` 做集成测试；Dockerfile 多阶段构建。
 
-### 3.8 文档与运维 ⚠️
-- **现状**：README 偏重业务叙事；`docs/` 技术栈描述过时（Zuul/Hystrix/Ribbon/Druid）。
+### 3.8 文档与运维 ✅（已落地）
+- **现状（已整改）**：文档体系已补齐为「架构 / 模块 / 差距 / 运维」四份分文档，技术栈描述全部校正为真实栈。
+- **已实现证据**：
+  - **新增 `docs/operations.md`（运维手册 + 故障预案）**：覆盖部署拓扑与端口、启动顺序（eureka → config-server → 业务模块 → gateway）、环境变量清单（`REQUIRED_CHANGEME` + `JWT_SECRET` 强制）、配置中心 native 后端说明、监控告警入口（Prometheus/Grafana/Zipkin/Cloud Admin）、7 类故障排查 Runbook（JWT 缺失 / DB 拒连 / 服务不注册 / 配置拉取失败 / 支付不一致 / 网关 401·429 / 看板无数据）、日常运维清单。
+  - **校正 `architecture.md`**：Spring Cloud Config 描述由 "Git-backed + 多数模块未接入" 改为 "native 后端 + 18 模块全量接入 + 本地兜底"；可观测性表补齐 Micrometer/Prometheus/Zipkin/Grafana/结构化日志为 ✅。
+  - **校正 `modules.md`**：`rydr-config-server` 描述由 "Git-based + 仅 demo 消费" 改为 "native 后端 + 18 模块接入"。
+  - **校正 `README.md`**：环境变量默认值 `changeme` → `REQUIRED_CHANGEME`；配置中心由「可选」改为「必需（native）」；actuator 收敛值补 `prometheus`；「后续演进方向」移除已落地的配置中心全量接入与可观测，保留 KMS/Saga/CI-CD 等真正待办，并指向 `operations.md`。
 - **企业级要求**：架构 / 模块 / 运维手册 / 故障预案分文档沉淀。
-- **建议**：本文档与 `architecture.md` / `modules.md` 已校正为真实栈（见同目录）。
+- **已完成**：四份分文档 + 真实栈校正 + 运维 Runbook。CI/CD 流水线文档为后续（见 3.7）。
 
 ---
 

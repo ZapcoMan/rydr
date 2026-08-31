@@ -1,6 +1,6 @@
 # Architecture Guide
 
-[Back to README](../README.md) | [Modules](modules.md) | [Enterprise Gap Analysis](enterprise-gap-analysis.md)
+[Back to README](../README.md) | [Modules](modules.md) | [Enterprise Gap Analysis](enterprise-gap-analysis.md) | [Operations](operations.md)
 
 > 本文档描述 **当前代码库真实的技术栈与架构**。已从历史文档中校正：Zuul → Spring Cloud Gateway、Hystrix → OpenFeign circuitbreaker/fallback、Ribbon → Spring Cloud LoadBalancer、Druid → HikariCP、WebSocket → SSE、Sleuth/Zipkin 已移除。
 
@@ -102,9 +102,9 @@ Rydr follows a **three-layer microservices architecture** powered by Spring Clou
 ## Configuration Management
 
 ### Spring Cloud Config
-- Git-backed centralized configuration (`rydr-config-server` at `:6001`).
-- `config-client` / `config-client-diy` demonstrate discovery-based consumption.
-- Most business/API modules still use local `application.yml` (see gap analysis P1).
+- Centralized configuration (`rydr-config-server` at `:6001`), **native (local filesystem) backend** loading `{app}-dev.yml` from `classpath:/config-repo/`.
+- **All 18 business/infrastructure modules are connected** via Eureka service discovery (`spring.cloud.config.discovery.service-id=config-server`), with a local `application.yml` fallback (`fail-fast=false`).
+- The optional git backend (`CONFIG_GIT_URI`) is commented out and can be enabled for a reachable private repository.
 
 ### Dynamic Refresh
 - RabbitMQ bus for config change propagation (`config-client`).
@@ -141,6 +141,9 @@ Rydr follows a **three-layer microservices architecture** powered by Spring Clou
 | Tool | Port | Purpose | Status |
 |------|------|---------|--------|
 | Spring Boot Admin | 6010 | Service health, logs | ✅ |
-| Actuator | per-service | `health,info` (exposure converged) | ✅ |
-| Micrometer / Prometheus / Tracing | — | Metrics & distributed tracing | ❌ not yet (gap P1) |
-| Hystrix Dashboard / Zipkin | — | (removed in Boot 3 upgrade) | ❌ removed |
+| Actuator | per-service | `health,info,prometheus` (exposure converged) | ✅ |
+| Micrometer + Prometheus | 9090 | Metrics (`/actuator/prometheus`) | ✅ |
+| Micrometer Tracing + Zipkin | 9411 | Distributed tracing (Brave bridge, traceId/spanId) | ✅ |
+| Grafana | 3000 | Metrics dashboards (`rydr-jvm-overview`) | ✅ |
+| Structured logging | — | logstash-logback-encoder + traceId/spanId MDC (JSON) | ✅ |
+| Hystrix Dashboard | — | (removed in Boot 3 upgrade) | ❌ removed |

@@ -1,6 +1,6 @@
 # Module Guide
 
-[Back to README](../README.md) | [Architecture](architecture.md) | [Enterprise Gap Analysis](enterprise-gap-analysis.md)
+[Back to README](../README.md) | [Architecture](architecture.md) | [Enterprise Gap Analysis](enterprise-gap-analysis.md) | [Operations](operations.md)
 
 This document provides detailed descriptions of each module in the Rydr platform.
 Technical stack below reflects the **current** code (Spring Cloud 2025.0.3 / Boot 3.5.16 / JDK 17):
@@ -130,9 +130,9 @@ Netflix Eureka service registry:
 **Port:** 6001 | **Path:** `rydr/rydr-config-server`
 
 Spring Cloud Config Server:
-- Git-based configuration repository.
-- RabbitMQ bus for dynamic refresh.
-- Only demo clients (`config-client`) consume it today (gap: business modules not yet connected).
+- **Native (local filesystem) backend**: serves `{app}-dev.yml` from `classpath:/config-repo/` for all 18 business/infrastructure modules.
+- RabbitMQ bus for dynamic refresh (`config-client`).
+- Optional git backend (`CONFIG_GIT_URI`) commented out for a reachable private repository.
 
 ### rydr-zuul
 **Port:** 9100 | **Path:** `rydr/rydr-zuul`
