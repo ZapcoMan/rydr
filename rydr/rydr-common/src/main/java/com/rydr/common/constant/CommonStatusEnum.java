@@ -5,6 +5,7 @@ import lombok.Getter;
 /**
  * @author oi
  */
+@Getter
 public enum CommonStatusEnum {
 
 	/** SMS verification code service 10001-10099 */
@@ -26,28 +27,11 @@ public enum CommonStatusEnum {
 
 	/** api-passenger Passenger API 10101-10199 */
 	PHONENUMBER_EMPTY(10101,"Phone number is empty"),
-	PHONENUMBER_ERROR(10102,"Phone number format is incorrect"),
+	PHONENUMBER_ERROR(10102,"Phone number format is incorrect");
 
 
-	/**
-     * 	Operation successful
-     */
-    SUCCESS(1, "success"),
-
-    /**
-     * 	Operation exception
-     */
-    INTERNAL_SERVER_EXCEPTION(0, "exception"),
-
-    /**
-     * 	Operation failed
-     */
-    FAIL(0, "fail");
-
-	@Getter
 	private final int code;
 
-	@Getter
     private final String value;
 
     private CommonStatusEnum(int code, String value) {

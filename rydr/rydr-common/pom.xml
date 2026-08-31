@@ -83,6 +83,23 @@
 			<artifactId>commons-lang3</artifactId>
 		</dependency>
 
+		<!-- ===== Observability: tracing bridge + structured JSON logging ===== -->
+		<!-- Brave tracing bridge (provides brave + micrometer-tracing transitively) -->
+		<dependency>
+			<groupId>io.micrometer</groupId>
+			<artifactId>micrometer-tracing-bridge-brave</artifactId>
+		</dependency>
+		<!-- Zipkin reporter so traces can be shipped to a Zipkin backend -->
+		<dependency>
+			<groupId>io.zipkin.reporter2</groupId>
+			<artifactId>zipkin-reporter-brave</artifactId>
+		</dependency>
+		<!-- JSON structured logging encoder (traceId/spanId via MDC) -->
+		<dependency>
+			<groupId>net.logstash.logback</groupId>
+			<artifactId>logstash-logback-encoder</artifactId>
+		</dependency>
+
 		<!-- Aliyun OSS -->
 		<dependency>
 			<groupId>com.aliyun.oss</groupId>

@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.rydr.common.constant.CommonStatusEnum;
 import com.rydr.dto.ResponseResult;
 import com.rydr.common.util.PhoneUtil;
 import com.rydr.passenger.service.ShortMsgService;

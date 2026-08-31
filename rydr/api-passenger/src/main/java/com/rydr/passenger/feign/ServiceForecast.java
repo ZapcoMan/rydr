@@ -9,14 +9,12 @@ import com.rydr.dto.ResponseResult;
 import com.rydr.common.dto.order.ForecastRequest;
 import com.rydr.common.dto.order.ForecastResponse;
 import com.rydr.passenger.annotation.ExcudeFeignConfig;
-import com.rydr.passenger.feign.config.FeignAuthConfiguration;
 
 /**
  * 
  * @author oi
  *
  */
-//@FeignClient(name = "service-valuation",configuration = FeignAuthConfiguration.class)
 @FeignClient(name = "service-valuation")
 public interface ServiceForecast {
 	

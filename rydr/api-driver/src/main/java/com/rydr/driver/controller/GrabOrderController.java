@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.rydr.common.dto.BaseResponse;
 import com.rydr.dto.ResponseResult;
 import com.rydr.driver.service.RestTemplateRequestService;
 

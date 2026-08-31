@@ -84,6 +84,11 @@
         <redisson.version>3.46.0</redisson.version>
         <jjwt.version>0.13.0</jjwt.version>
         <spring-boot-admin.version>3.5.0</spring-boot-admin.version>
+        <!-- Observability: Micrometer Tracing + Brave + Zipkin -->
+        <micrometer-tracing.version>1.5.0</micrometer-tracing.version>
+        <zipkin-reporter.version>3.4.4</zipkin-reporter.version>
+        <brave.version>6.0.3</brave.version>
+        <logstash-logback.version>7.4.0</logstash-logback.version>
     </properties>
 
     <dependencyManagement>
@@ -140,6 +145,40 @@
                 <groupId>de.codecentric</groupId>
                 <artifactId>spring-boot-admin-server</artifactId>
                 <version>${spring-boot-admin.version}</version>
+            </dependency>
+
+            <!-- ===== Observability: Metrics + Tracing + structured logging ===== -->
+            <!-- Micrometer Tracing facade (Spring Boot BOM also manages, pinned here for clarity) -->
+            <dependency>
+                <groupId>io.micrometer</groupId>
+                <artifactId>micrometer-tracing</artifactId>
+                <version>${micrometer-tracing.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.micrometer</groupId>
+                <artifactId>micrometer-tracing-bridge-brave</artifactId>
+                <version>${micrometer-tracing.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.micrometer</groupId>
+                <artifactId>micrometer-registry-prometheus</artifactId>
+            </dependency>
+            <!-- Zipkin reporter (Brave bridge) -->
+            <dependency>
+                <groupId>io.zipkin.reporter2</groupId>
+                <artifactId>zipkin-reporter-brave</artifactId>
+                <version>${zipkin-reporter.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.openfeign</groupId>
+                <artifactId>feign-brave</artifactId>
+                <version>${brave.version}</version>
+            </dependency>
+            <!-- Structured JSON logging -->
+            <dependency>
+                <groupId>net.logstash.logback</groupId>
+                <artifactId>logstash-logback-encoder</artifactId>
+                <version>${logstash-logback.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

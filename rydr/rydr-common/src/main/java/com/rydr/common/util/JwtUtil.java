@@ -21,10 +21,19 @@ public class JwtUtil {
 
     /**
      * Secret key, stored only on the server side.
-     * IMPORTANT: Override via environment variable JWT_SECRET in production.
+     * IMPORTANT: Must be provided via environment variable JWT_SECRET in production.
+     * A missing JWT_SECRET fails fast at startup (no insecure default).
      */
-    private static String secret = System.getenv("JWT_SECRET") != null
-            ? System.getenv("JWT_SECRET") : "changeme-override-in-production";
+    private static final String secret = resolveSecret();
+
+    private static String resolveSecret() {
+        String env = System.getenv("JWT_SECRET");
+        if (env == null || env.isBlank()) {
+            throw new IllegalStateException(
+                    "JWT_SECRET environment variable is required but not set. Refusing to start with an insecure default.");
+        }
+        return env;
+    }
 
     /**
      * The signing key is derived from the secret with SHA-256, so secrets of any length

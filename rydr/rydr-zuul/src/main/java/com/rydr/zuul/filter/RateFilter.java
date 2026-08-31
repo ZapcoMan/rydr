@@ -36,7 +36,7 @@ public class RateFilter implements GlobalFilter, Ordered {
 	 */
 	private static final RateLimiter RATE_LIMITER = RateLimiter.create(5);
 
-	@Value("${rydr.gateway.rate-limit.enabled:false}")
+	@Value("${rydr.gateway.rate-limit.enabled:true}")
 	private boolean rateLimitEnabled;
 
 	@Override
