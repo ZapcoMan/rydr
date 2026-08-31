@@ -1,9 +1,9 @@
 package com.rydr.service.impl;
 
 import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import com.rydr.constant.SmsStatusEnum;
 import com.rydr.dao.SmsDao;
@@ -14,11 +14,13 @@ import com.rydr.common.dto.sms.SmsSendRequest;
 import com.rydr.common.dto.sms.SmsTemplateDto;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 
 import com.rydr.common.util.JsonUtil;
 import com.rydr.service.AliService;
+import com.rydr.service.SmsSender;
 
 import lombok.extern.slf4j.Slf4j;
 /**
@@ -29,9 +31,10 @@ import lombok.extern.slf4j.Slf4j;
 public class AliServiceImpl implements AliService {
 
 	/**
-	*   Cache templates used for content replacement
+	*   Cache templates used for content replacement.
+	*   Entries expire so a template edited in the DB is picked up without a restart.
 	 */
-    private Map<String, String> templateMaps = new HashMap<String, String>();
+    private final ConcurrentMap<String, TemplateCacheEntry> templateMaps = new ConcurrentHashMap<>();
 
     @Autowired
     private SmsTemplateDao smsTemplateDto;
@@ -39,75 +42,144 @@ public class AliServiceImpl implements AliService {
     @Autowired
     private SmsDao smsDao;
 
+    @Autowired
+    private SmsSender smsSender;
+
+    /** How long a template stays cached, in milliseconds. */
+    @Value("${sms.template-cache-ttl:300000}")
+    private long templateCacheTtlMs;
+
+    /**
+     * Send every template in the request to every receiver.
+     *
+     * @return the number of messages that could not be delivered (0 means all succeeded)
+     */
     @Override
     public int sendSms(SmsSendRequest request) {
         log.info(request.toString());
 
+        if (request == null || request.getReceivers() == null || request.getData() == null) {
+            log.warn("Empty SMS request, nothing to send");
+            return 0;
+        }
+
+        int failures = 0;
+
         for (String phoneNumber : request.getReceivers()) {
-            List<SmsTemplateDto> templates = request.getData();
+            if (StringUtils.isBlank(phoneNumber)) {
+                continue;
+            }
 
-            ServiceSmsRecord sms = new ServiceSmsRecord();
-            sms.setPhoneNumber(phoneNumber);
-
-            for (SmsTemplateDto template : templates) {
-                // Load template content from DB to cache
-                if (!templateMaps.containsKey(template.getId())) {
-                	// The commented-out content here loads the DB template into memory
-                	ServiceSmsTemplate t = smsTemplateDto.getByTemplateId(template.getId());
-                	System.out.println(t.getTemplateContent());
-                    templateMaps.put(template.getId(),
-                    		smsTemplateDto.getByTemplateId(template.getId()).getTemplateContent());
+            for (SmsTemplateDto template : request.getData()) {
+                String content = renderContent(template);
+                if (content == null) {
+                    // Template not configured: count it, but keep processing the remaining ones
+                    failures++;
+                    continue;
                 }
 
-                // Replace placeholders
-                String content = templateMaps.get(template.getId());
-                for (Map.Entry<String, Object> entry : template.getTemplateMap().entrySet()) {
-                    content = StringUtils.replace(content, "${" + entry.getKey() + "}", "" + entry.getValue());
-                }
+                // One persisted record per (phone number, template)
+                ServiceSmsRecord sms = new ServiceSmsRecord();
+                sms.setPhoneNumber(phoneNumber);
+                sms.setSmsContent(content);
+                sms.setOperatorName("");
 
-                // When an error occurs, do not affect sending to other phone numbers and templates
+                // When one phone number or template fails, the others must still be sent
                 try {
-                    int result = send(phoneNumber, template.getId(), template.getTemplateMap());
-
-                    // Assemble SMS object
-                    sms.setSendTime(new Date());
-                    sms.setOperatorName("");
-                    sms.setSendFlag(1);
-                    sms.setSendNumber(0);
-                    sms.setSmsContent(content);
+                    String param = template.getTemplateMap() == null
+                            ? "{}" : JsonUtil.toJson(template.getTemplateMap());
+                    int result = smsSender.send(phoneNumber, template.getId(), param);
 
                     if (result != SmsStatusEnum.SEND_SUCCESS.getCode()) {
-                        throw new Exception("SMS sending failed");
+                        throw new IllegalStateException("SMS provider did not accept the message");
                     }
+                    sms.setSendFlag(1);
+                    sms.setSendNumber(0);
                 } catch (Exception e) {
+                    failures++;
                     sms.setSendFlag(0);
                     sms.setSendNumber(1);
                     log.error("Failed to send SMS (" + template.getId() + "): " + phoneNumber, e);
                 } finally {
+                    sms.setSendTime(new Date());
                     sms.setCreateTime(new Date());
                     smsDao.insert(sms);
                 }
             }
         }
-        return 0;
+        return failures;
     }
 
-    private int send(String phoneNumber, String templateId, Map<String, ?> map) throws Exception {
-        return sendMsg(phoneNumber, templateId, JsonUtil.toJson(map));
-    }
-
-    private int sendMsg(String phoneNumber, String templateCode, String param) {
-        // Validate parameters before "sending" - empty params must not be treated as success
-        if (StringUtils.isBlank(phoneNumber) || StringUtils.isBlank(templateCode) || StringUtils.isBlank(param)) {
-            log.error("Invalid SMS send params: phoneNumber={}, templateCode={}, param={}", phoneNumber, templateCode, param);
-            return SmsStatusEnum.SEND_FAIL.getCode();
+    /**
+     * Load the template body and replace its {@code ${placeholder}} tokens.
+     *
+     * @return the rendered content, or {@code null} when the template is not configured
+     */
+    private String renderContent(SmsTemplateDto template) {
+        if (template == null || StringUtils.isBlank(template.getId())) {
+            log.error("SMS request contains a template without an id");
+            return null;
         }
-        log.info("Sending SMS via provider API: phoneNumber={}, templateCode={}, param={}", phoneNumber, templateCode, param);
-        /**
-         * Implement according to the SMS provider's API
-         * e.g. Aliyun Dysmsapi: sendSms(accessKeyId, accessKeySecret, phoneNumber, templateCode, param)
-    	*/
-    	return SmsStatusEnum.SEND_SUCCESS.getCode();
 
+        String content = loadTemplateContent(template.getId());
+        if (content == null) {
+            return null;
+        }
+
+        if (template.getTemplateMap() != null) {
+            for (Map.Entry<String, Object> entry : template.getTemplateMap().entrySet()) {
+                content = StringUtils.replace(content, "${" + entry.getKey() + "}", "" + entry.getValue());
+            }
+        }
+        return content;
+    }
+
+    /**
+     * Read the template body through the cache.
+     *
+     * {@link ConcurrentHashMap#compute} guarantees a single DB query per key even when several
+     * threads miss at the same time, and returning {@code null} drops the entry so an unknown
+     * template is never cached.
+     */
+    private String loadTemplateContent(String templateId) {
+        long now = System.currentTimeMillis();
+        TemplateCacheEntry entry = templateMaps.compute(templateId, (id, existing) -> {
+            if (existing != null && !existing.isExpired(now)) {
+                return existing;
+            }
+            ServiceSmsTemplate t = smsTemplateDto.getByTemplateId(id);
+            if (t == null || StringUtils.isBlank(t.getTemplateContent())) {
+                return null;
+            }
+            return new TemplateCacheEntry(t.getTemplateContent(), now + templateCacheTtlMs);
+        });
+
+        if (entry == null) {
+            log.error("SMS template [{}] is not configured, the message will not be sent", templateId);
+            return null;
+        }
+        return entry.getContent();
+    }
+
+    /**
+     * Cached template body with a simple time based expiry.
+     */
+    private static final class TemplateCacheEntry {
+
+        private final String content;
+        private final long expireAt;
+
+        private TemplateCacheEntry(String content, long expireAt) {
+            this.content = content;
+            this.expireAt = expireAt;
+        }
+
+        private String getContent() {
+            return content;
+        }
+
+        private boolean isExpired(long now) {
+            return now >= expireAt;
+        }
     }
 }
