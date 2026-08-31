@@ -14,7 +14,7 @@ spring:
 # Service registry
 eureka:
   client:
-    enabled: false
+    enabled: true
     healthcheck:      enabled: true
     # Set service registry URL
     service-url:
@@ -38,7 +38,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: "*"
+        include: health,info
   endpoint:
     health:
       show-details: ALWAYS

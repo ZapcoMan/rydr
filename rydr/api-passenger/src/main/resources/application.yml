@@ -30,10 +30,13 @@ eureka:
     # Set service registry URL
     service-url:
       defaultZone: http://${EUREKA_USER:admin}:${EUREKA_PASSWORD:changeme}@${EUREKA_HOST:eureka-7900}:7900/eureka/
-    enabled: false
+    enabled: true
   instance:
     hostname: localhost
     instance-id: api-passenger
+    prefer-ip-address: true
+    lease-renewal-interval-in-seconds: 1
+    lease-expiration-duration-in-seconds: 1
 
 feign:
   compression:
@@ -61,7 +64,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: "*"
+        include: health,info
   endpoint:
     health:
       # Default is never

@@ -6,6 +6,31 @@ server:
 spring:
   application:
     name: service-wallet
+  # Wallet / payment persistence (same database as order & valuation: rydr)
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:rydr}?characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
+    username: ${DB_USER:root}
+    password: ${DB_PASSWORD:changeme}
+    hikari:
+      minimum-idle: 5
+      maximum-pool-size: 20
+      connection-timeout: 20000
+      max-lifetime: 1800000
+      connection-test-query: SELECT 1
+  redis:
+    host: ${REDIS_HOST:127.0.0.1}
+    port: ${REDIS_PORT:6379}
+    timeout: 2000
+    password: ${REDIS_PASSWORD:}
+
+# MyBatis
+mybatis:
+  mapper-locations:
+    - classpath:mybatis/mapper/*.xml
+  type-aliases-package: com.rydr.wallet.entity
+  configuration:
+    map-underscore-to-camel-case: true
 
 # Service registry
 eureka:
@@ -37,7 +62,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: "*"
+        include: health,info
   endpoint:
     health:
       show-details: ALWAYS

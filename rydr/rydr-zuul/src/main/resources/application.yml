@@ -94,7 +94,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: "*"
+        include: health,info
   endpoint:
     health:
       # Default is never
