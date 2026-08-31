@@ -86,6 +86,9 @@
         <spring-boot-admin.version>3.5.0</spring-boot-admin.version>
         <!-- Observability: structured JSON logging (version not managed by Boot BOM) -->
         <logstash-logback.version>8.1</logstash-logback.version>
+        <!-- Spring Cloud Config (config-server/client/bootstr not managed by the Spring Cloud BOM) -->
+        <spring-cloud-config.version>4.3.4</spring-cloud-config.version>
+        <spring-cloud-bootstrap.version>4.3.3</spring-cloud-bootstrap.version>
     </properties>
 
     <dependencyManagement>
@@ -160,18 +163,21 @@
 
             <!-- ===== Configuration center (Spring Cloud Config) ===== -->
             <!--
-                spring-cloud-starter-config / spring-cloud-starter-bootstrap versions are
-                managed by the Spring Cloud BOM (spring-cloud-dependencies) imported above,
-                so no <version> is pinned here. Declared explicitly to document that these
-                two starters are the canonical config-client deps shared by the 18 modules.
+                spring-cloud-starter-config / spring-cloud-starter-bootstrap are NOT listed
+                in the Spring Cloud BOM (spring-cloud-dependencies) dependencyManagement.
+                Spring Cloud Config 4.3.x is the stable line for Boot 3.x / Spring Cloud
+                2025.x (5.0.x targets Boot 4.x), matching the existing spring-cloud-config-
+                server/client 4.3.4 already used by rydr-config-server / config-client.
             -->
             <dependency>
                 <groupId>org.springframework.cloud</groupId>
                 <artifactId>spring-cloud-starter-config</artifactId>
+                <version>${spring-cloud-config.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework.cloud</groupId>
                 <artifactId>spring-cloud-starter-bootstrap</artifactId>
+                <version>${spring-cloud-bootstrap.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
