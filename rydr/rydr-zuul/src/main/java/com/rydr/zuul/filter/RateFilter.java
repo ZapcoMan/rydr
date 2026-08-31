@@ -14,6 +14,7 @@ import org.springframework.web.server.ServerWebExchange;
 
 import com.google.common.util.concurrent.RateLimiter;
 
+import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
 /**
@@ -23,6 +24,7 @@ import reactor.core.publisher.Mono;
  * @author oi
  */
 @Component
+@Slf4j
 public class RateFilter implements GlobalFilter, Ordered {
 
 	/**
@@ -47,7 +49,7 @@ public class RateFilter implements GlobalFilter, Ordered {
 		 * Returns immediately if no token is available
 		 */
 		if (!RATE_LIMITER.tryAcquire()) {
-			System.out.println("rate filter cannot acquire token, rate limited");
+			log.info("rate filter cannot acquire token, rate limited");
 			ServerHttpResponse response = exchange.getResponse();
 			response.setStatusCode(HttpStatus.TOO_MANY_REQUESTS);
 			DataBuffer buffer = response.bufferFactory()
