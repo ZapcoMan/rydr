@@ -1,0 +1,140 @@
+# Prometheus scrape configuration for the rydr microservices platform.
+#
+# All microservices run on the host (via IDE / spring-boot:run), so targets are
+# addressed through host.docker.internal (the Docker host from inside a container).
+# Each target scrapes /actuator/prometheus exposed by Spring Boot Actuator.
+
+global:
+  scrape_interval: 15s      # How often to scrape targets by default.
+  evaluation_interval: 15s  # How often to evaluate rules.
+  scrape_timeout: 10s
+
+scrape_configs:
+
+  # Infrastructure
+  - job_name: 'eureka'
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets: ['host.docker.internal:7900']
+        labels:
+          service: 'eureka'
+
+  - job_name: 'rydr-config-server'
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets: ['host.docker.internal:6001']
+        labels:
+          service: 'rydr-config-server'
+
+  - job_name: 'cloud-admin'
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets: ['host.docker.internal:6010']
+        labels:
+          service: 'cloud-admin'
+
+  - job_name: 'rydr-zuul'
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets: ['host.docker.internal:9100']
+        labels:
+          service: 'rydr-zuul'
+
+  # API layer
+  - job_name: 'api-driver'
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets: ['host.docker.internal:9002']
+        labels:
+          service: 'api-driver'
+
+  - job_name: 'api-passenger'
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets: ['host.docker.internal:9011']
+        labels:
+          service: 'api-passenger'
+
+  - job_name: 'api-listen-order'
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets: ['host.docker.internal:8084']
+        labels:
+          service: 'api-listen-order'
+
+  # Service layer
+  - job_name: 'service-order'
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets: ['host.docker.internal:8004']
+        labels:
+          service: 'service-order'
+
+  - job_name: 'service-order-dispatch'
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets: ['host.docker.internal:8006']
+        labels:
+          service: 'service-order-dispatch'
+
+  - job_name: 'service-wallet'
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets: ['host.docker.internal:8007']
+        labels:
+          service: 'service-wallet'
+
+  - job_name: 'service-valuation'
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets: ['host.docker.internal:8060']
+        labels:
+          service: 'service-valuation'
+
+  - job_name: 'service-sms'
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets: ['host.docker.internal:8002']
+        labels:
+          service: 'service-sms'
+
+  - job_name: 'service-passenger-user'
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets: ['host.docker.internal:8012']
+        labels:
+          service: 'service-passenger-user'
+
+  - job_name: 'service-verification-code'
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets: ['host.docker.internal:8011']
+        labels:
+          service: 'service-verification-code'
+
+  # JMS demo
+  - job_name: 'service-jms-produce'
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets: ['host.docker.internal:5001']
+        labels:
+          service: 'service-jms-produce'
+
+  - job_name: 'service-jms-consumer'
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets: ['host.docker.internal:5002']
+        labels:
+          service: 'service-jms-consumer'
+
+  - job_name: 'rydr-demo-app'
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets: ['host.docker.internal:8083']
+        labels:
+          service: 'rydr-demo-app'
+
+  # Prometheus itself
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
