@@ -9,6 +9,7 @@ import org.redisson.RedissonRedLock;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -18,11 +19,18 @@ import org.springframework.stereotype.Service;
 @Service("grabRedisRedissonRedLockLockService")
 public class GrabRedisRedissonRedLockLockServiceImpl implements GrabService {
 
+    // This module exposes four RedissonClient beans. Bind each field explicitly so that RedLock
+    // really spans three independent Redis instances instead of relying on by-name fallback.
+    // Do not mark one of them @Primary: primary wins over by-name matching and would silently
+    // point all three fields at the same client.
     @Autowired
+    @Qualifier("redissonRed1")
     private RedissonClient redissonRed1;
     @Autowired
+    @Qualifier("redissonRed2")
     private RedissonClient redissonRed2;
     @Autowired
+    @Qualifier("redissonRed3")
     private RedissonClient redissonRed3;
 
     @Autowired
