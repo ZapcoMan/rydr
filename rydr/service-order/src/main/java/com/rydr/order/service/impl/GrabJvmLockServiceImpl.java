@@ -7,6 +7,14 @@ import com.rydr.dto.ResponseResult;
 import com.rydr.order.service.GrabService;
 import com.rydr.order.service.OrderService;
 
+import lombok.extern.slf4j.Slf4j;
+
+/**
+ * @deprecated Retained as a reference implementation only. Production traffic uses
+ * {@code GrabRedisRedissonServiceImpl} (single Redisson instance) for distributed locking.
+ */
+@Deprecated
+@Slf4j
 @Service("grabJvmLockService")
 public class GrabJvmLockServiceImpl implements GrabService {
 
@@ -19,13 +27,16 @@ public class GrabJvmLockServiceImpl implements GrabService {
 
 		synchronized (lock.intern()) {
 			try {
-				System.out.println("Driver:"+driverId+" executing order grab logic");
+				log.info("Driver:{} executing order grab logic", driverId);
 
 	            boolean b = orderService.grab(orderId, driverId);
 	            if(b) {
-	            	System.out.println("Driver:"+driverId+" grabbed order successfully");
-	            }else {
-	            	System.out.println("Driver:"+driverId+" failed to grab order");
+	            	log.info("Driver:{} grabbed order {} successfully", driverId, orderId);
+	            	return ResponseResult.success("");
+	            } else {
+	            	log.info("Driver:{} failed to grab order {}", driverId, orderId);
+	            	return ResponseResult.fail(com.rydr.constatnt.BusinessInterfaceStatus.FAIL.getCode(),
+	            			"Order already taken or not dispatchable");
 	            }
 
 	        } finally {
@@ -33,9 +44,6 @@ public class GrabJvmLockServiceImpl implements GrabService {
 
 	        }
 		}
-
-
-		return null;
 	}
 
 }

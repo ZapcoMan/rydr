@@ -11,6 +11,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import com.rydr.dto.ResponseResult;
+import lombok.extern.slf4j.Slf4j;
 import com.rydr.common.entity.OrderLock;
 import com.rydr.order.lock.MysqlLock;
 import com.rydr.order.lock.RedisLock;
@@ -21,6 +22,7 @@ import com.rydr.order.service.OrderService;
  * @author oi
  */
 @Service("grabRedisRedissonService")
+@Slf4j
 public class GrabRedisRedissonServiceImpl implements GrabService {
 
 	@Autowired
@@ -41,18 +43,20 @@ public class GrabRedisRedissonServiceImpl implements GrabService {
     	try {
     		// This code by default sets key timeout to 30 seconds, and renews after 10 seconds
     		rlock.lock();
-			System.out.println("Driver:"+driverId+" executing order grab logic");
+			log.info("Driver:{} executing order grab logic", driverId);
 
             boolean b = orderService.grab(orderId, driverId);
             if(b) {
-            	System.out.println("Driver:"+driverId+" grabbed order successfully");
-            }else {
-            	System.out.println("Driver:"+driverId+" failed to grab order");
+            	log.info("Driver:{} grabbed order {} successfully", driverId, orderId);
+            	return ResponseResult.success("");
+            } else {
+            	log.info("Driver:{} failed to grab order {}", driverId, orderId);
+            	return ResponseResult.fail(com.rydr.constatnt.BusinessInterfaceStatus.FAIL.getCode(),
+            			"Order already taken or not dispatchable");
             }
 
         } finally {
         	rlock.unlock();
         }
-        return null;
     }
 }

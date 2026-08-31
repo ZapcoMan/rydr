@@ -13,9 +13,16 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * @author oi
+ *
+ * @deprecated Retained as a reference implementation only. Production traffic uses
+ * {@code GrabRedisRedissonServiceImpl} (single Redisson instance) for distributed locking.
  */
+@Deprecated
+@Slf4j
 @Service("grabRedisRedissonRedLockLockService")
 public class GrabRedisRedissonRedLockLockServiceImpl implements GrabService {
 
@@ -57,18 +64,20 @@ public class GrabRedisRedissonRedLockLockServiceImpl implements GrabService {
 
         try {
     		// This code by default sets key timeout to 30 seconds, and renews after 10 seconds
-			System.out.println("Driver:"+driverId+" executing order grab logic");
+			log.info("Driver:{} executing order grab logic", driverId);
 
             boolean b = orderService.grab(orderId, driverId);
             if(b) {
-            	System.out.println("Driver:"+driverId+" grabbed order successfully");
-            }else {
-            	System.out.println("Driver:"+driverId+" failed to grab order");
+            	log.info("Driver:{} grabbed order {} successfully", driverId, orderId);
+            	return ResponseResult.success("");
+            } else {
+            	log.info("Driver:{} failed to grab order {}", driverId, orderId);
+            	return ResponseResult.fail(com.rydr.constatnt.BusinessInterfaceStatus.FAIL.getCode(),
+            			"Order already taken or not dispatchable");
             }
 
         } finally {
         	rLock.unlock();
         }
-        return null;
     }
 }

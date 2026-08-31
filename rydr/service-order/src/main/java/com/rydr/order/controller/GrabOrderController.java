@@ -1,6 +1,5 @@
 package com.rydr.order.controller;
 
-import com.rydr.common.dto.BaseResponse;
 import com.rydr.dto.ResponseResult;
 import com.rydr.order.service.GrabService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,9 +28,7 @@ public class GrabOrderController {
 
 
     @GetMapping("/do/{orderId}")
-    public String grab(@PathVariable("orderId") int orderId, int driverId){
-        grabService.grabOrder(orderId,driverId);
-        ResponseResult.success(new BaseResponse());
-        return "";
+    public ResponseResult grab(@PathVariable("orderId") int orderId, int driverId){
+        return grabService.grabOrder(orderId, driverId);
     }
 }
