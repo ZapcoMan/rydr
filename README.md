@@ -10,7 +10,7 @@
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
-[架构](#架构) | [快速开始](#快速开始) | [模块说明](#模块说明) | [文档](docs/) | [贡献指南](CONTRIBUTING.md)
+[架构](#架构) | [快速开始](#快速开始) | [模块说明](#模块说明) | [运维手册](docs/operations.md) | [文档](docs/) | [贡献指南](CONTRIBUTING.md)
 
 </div>
 
@@ -158,13 +158,13 @@ cp .env.example .env
 | `DB_HOST` | MySQL 主机 | `localhost` |
 | `DB_PORT` | MySQL 端口 | `3306` |
 | `DB_USER` | MySQL 用户名 | `root` |
-| `DB_PASSWORD` | MySQL 密码 | `changeme` |
+| `DB_PASSWORD` | MySQL 密码 | `REQUIRED_CHANGEME` |
 | `DB_NAME` | 业务库（订单/计价） | `rydr` |
 | `DB_NAME_THREE` | 业务库（乘客/短信） | `rydr-three` |
 | `REDIS_HOST` | Redis 主机 | `127.0.0.1` |
 | `EUREKA_USER` | Eureka 认证用户名 | `admin` |
-| `EUREKA_PASSWORD` | Eureka 认证密码 | `changeme` |
-| `JWT_SECRET` | JWT 签名密钥 | *(需自行生成)* |
+| `EUREKA_PASSWORD` | Eureka 认证密码 | `REQUIRED_CHANGEME` |
+| `JWT_SECRET` | JWT 签名密钥 | *(无默认，需自行注入)* |
 
 > 完整的可配置变量清单见 [`.env.example`](.env.example)。
 
@@ -184,7 +184,7 @@ docker compose up -d
 # 1. 注册中心
 cd rydr/eureka && mvn spring-boot:run -Dspring.profiles.active=7900
 
-# 2. 配置中心（可选）
+# 2. 配置中心（native 后端，业务模块通过服务发现接入）
 cd rydr/rydr-config-server && mvn spring-boot:run
 
 # 3. 业务服务
@@ -482,13 +482,13 @@ sequenceDiagram
 - 切勿提交 `.env` 文件或任何包含真实凭证的文件
 - **网关统一鉴权**：`rydr-zuul` 对所有 `/api-*` 请求做全局 JWT 校验（登录/验证码/计价/SSE/健康检查/网关探测除外），无有效 Token 返回 401；认证主体通过 `X-Authenticated-Subject` 透传下游
 - **限流**：`RateFilter` 已就绪，设置 `rydr.gateway.rate-limit.enabled=true` 即启用（默认 5 QPS）
-- **actuator 收敛**：所有服务 `management.endpoints.web.exposure.include` 已收敛为 `health,info`
+- **actuator 收敛**：所有服务 `management.endpoints.web.exposure.include` 已收敛为 `health,info,prometheus`
 - **统一异常**：`rydr-common#GlobalExceptionHandler`（`@RestControllerAdvice`）统一返回 `ResponseResult`，码值遵循 `BusinessInterfaceStatus`（SUCCESS=0 / FAIL=1）
 - **并发安全与幂等**：钱包扣款使用条件 UPDATE 防超扣，充值/支付以 `biz_no` / `out_trade_no` 唯一约束防重复入账
 - **密钥**：RSA 私钥、JWT 签名密钥均已外部化；生产环境**必须**通过 `JWT_SECRET` 等变量注入强密钥，不可使用默认值
 - Eureka 端点已通过 HTTP Basic 认证保护
 
-> **企业级差距（后续演进方向）**：当前已满足"业务闭环可用 + 基础安全可运维"，以下属更大议题，详细规划见 [docs/enterprise-gap-analysis.md](docs/enterprise-gap-analysis.md)：配置中心/KMS 全量接入、Flyway 版本化数据迁移、分布式事务 Saga/消息补偿、司机注册/实名独立服务、JMS 订单事件驱动、Micrometer/Prometheus/TraceID 全链路可观测、短信/计价真实服务商密钥配置。
+> **企业级差距（后续演进方向）**：当前已满足"业务闭环可用 + 安全可运维 + 可观测 + 数据最终一致"。以下属更大议题，详细规划见 [docs/enterprise-gap-analysis.md](docs/enterprise-gap-analysis.md)：KMS/Vault 密钥托管、Flyway 版本化数据迁移、Saga/TCC 分布式事务深化、司机注册/实名独立服务、JMS 订单事件驱动、CI/CD 与测试、短信/计价真实服务商密钥配置。运维与故障排查见 [docs/operations.md](docs/operations.md)。
 
 ## 贡献指南
 
