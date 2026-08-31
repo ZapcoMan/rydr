@@ -15,12 +15,17 @@ import jakarta.jms.Topic;
 @Configuration
 public class ActiveMQConfig {
 
+    /**
+     * Queue consumed by service-jms-consumer; keep the two sides in sync.
+     */
+    public static final String QUEUE_NAME = "ActiveMQQueue";
+
     @Value("${spring.activemq.broker-url}")
     private  String brokerUrl;
 
     @Bean
     public Queue queue() {
-        return new ActiveMQQueue("ActiveMQQueue");
+        return new ActiveMQQueue(QUEUE_NAME);
     }
 
     @Bean

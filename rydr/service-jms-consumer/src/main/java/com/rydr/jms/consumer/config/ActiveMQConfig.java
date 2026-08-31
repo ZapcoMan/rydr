@@ -17,12 +17,18 @@ import jakarta.jms.Topic;
 @Configuration
 public class ActiveMQConfig {
 
+    /**
+     * Must match the queue produced by service-jms-produce,
+     * otherwise the messages sent there are never delivered here.
+     */
+    public static final String QUEUE_NAME = "ActiveMQQueue";
+
     @Value("${spring.activemq.broker-url}")
     private  String brokerUrl;
 
     @Bean
     public Queue queue() {
-        return new ActiveMQQueue("ActiveMQQueue");
+        return new ActiveMQQueue(QUEUE_NAME);
     }
 
     @Bean
