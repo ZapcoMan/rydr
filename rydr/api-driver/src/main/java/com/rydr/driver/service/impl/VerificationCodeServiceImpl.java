@@ -6,19 +6,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import com.rydr.constatnt.BusinessInterfaceStatus;
 import com.rydr.dto.ResponseResult;
 import com.rydr.common.dto.verificationcode.VerifyCodeResponse;
+import com.rydr.driver.request.CodeVerifyRequest;
 import com.rydr.driver.service.VerificationCodeService;
 
-import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * @author oi
  */
 @Service
+@Slf4j
 public class VerificationCodeServiceImpl implements VerificationCodeService {
 
 	@Autowired
@@ -31,17 +35,43 @@ public class VerificationCodeServiceImpl implements VerificationCodeService {
 		String url = "http://"+SERVICE_VERIFICATION_CODE_SERVICE+"/verify-code/generate/"+ IdentityConstant.DRIVER+ "/" +phoneNumber;
 		ResponseResult result = restTemplate.exchange(url, HttpMethod.GET,new HttpEntity<Object>(null,null),ResponseResult.class).getBody();
 
-		if(result.getCode()==0) {
+		if(result != null && result.getCode() == BusinessInterfaceStatus.SUCCESS.getCode()) {
 			VerifyCodeResponse response = JsonUtil.toBean(result.getData(), VerifyCodeResponse.class);
-			return response.getCode();
+			return response == null ? "" : response.getCode();
 		}else {
+			log.warn("Failed to generate verification code for driver phone={}", phoneNumber);
 			return "";
 		}
 	}
 
+	/**
+	 * Verify the verification code against service-verification-code.
+	 *
+	 * @return "1" when the code is valid, "0" when it is invalid or the call failed
+	 */
 	@Override
 	public String checkCode(String phoneNumber, String code) {
-		return null;
+		String url = "http://" + SERVICE_VERIFICATION_CODE_SERVICE + "/verify-code/verify";
+		CodeVerifyRequest request = new CodeVerifyRequest();
+		request.setIdentity(IdentityConstant.DRIVER);
+		request.setPhoneNumber(phoneNumber);
+		request.setCode(code);
+
+		try {
+			HttpHeaders headers = new HttpHeaders();
+			headers.setContentType(MediaType.APPLICATION_JSON);
+			ResponseResult result = restTemplate.exchange(
+					url, HttpMethod.POST, new HttpEntity<Object>(request, headers), ResponseResult.class).getBody();
+
+			if (result != null && result.getCode() == BusinessInterfaceStatus.SUCCESS.getCode()) {
+				return "1";
+			}
+			log.warn("Verification code mismatch for driver phone={}, message={}",
+					phoneNumber, result == null ? "no response" : result.getMessage());
+		} catch (Exception e) {
+			log.error("Failed to check verification code for driver phone=" + phoneNumber, e);
+		}
+		return "0";
 	}
 
 }
