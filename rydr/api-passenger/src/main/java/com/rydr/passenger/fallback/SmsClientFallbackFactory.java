@@ -8,7 +8,16 @@ import com.rydr.passenger.feign.SmsClient;
 
 import org.springframework.cloud.openfeign.FallbackFactory;
 
+import lombok.extern.slf4j.Slf4j;
+
+/**
+ * Graceful degradation for service-sms: report a normal failure response the caller can handle,
+ * instead of letting the circuit breaker throw.
+ *
+ * @author oi
+ */
 @Component
+@Slf4j
 public class SmsClientFallbackFactory implements FallbackFactory<SmsClient> {
 
 	@Override
@@ -17,8 +26,8 @@ public class SmsClientFallbackFactory implements FallbackFactory<SmsClient> {
 
 			@Override
 			public ResponseResult sendSms(SmsSendRequest smsSendRequest) {
-				System.out.println("feign exception: "+cause);
-				return ResponseResult.fail(-3, "feign fallback factory circuit breaker");
+				log.error("SMS service unavailable, circuit breaker triggered: " + cause.getMessage(), cause);
+				return ResponseResult.fail(-3, "SMS service unavailable, please retry later");
 			}
 		};
 	}
