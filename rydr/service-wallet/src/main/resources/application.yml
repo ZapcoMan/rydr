@@ -1,6 +1,6 @@
-# Service port
+# Service port (8006 is already taken by service-order-dispatch)
 server:
-  port: 8006
+  port: 8007
 
 # Application name and configuration
 spring:
@@ -15,7 +15,7 @@ eureka:
   client:
     # Set service registry URL
     service-url:
-      defaultZone: http://${EUREKA_USER:admin}:${EUREKA_PASSWORD:changeme}@${EUREKA_HOST:eureka-7901}:7901/eureka/
+      defaultZone: http://${EUREKA_USER:admin}:${EUREKA_PASSWORD:changeme}@${EUREKA_HOST:eureka-7900}:7900/eureka/
   instance:
     # Heartbeat interval in seconds
     lease-renewal-interval-in-seconds: 1

@@ -2,6 +2,5 @@ server:
   port: 8083
 spring:
   application:
-    name: message
-  thymeleaf:
-    cache: false
+    name: rydr-demo-app
+  # spring.thymeleaf removed: the thymeleaf starter is no longer a dependency of this module
