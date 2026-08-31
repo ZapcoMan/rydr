@@ -84,11 +84,8 @@
         <redisson.version>3.46.0</redisson.version>
         <jjwt.version>0.13.0</jjwt.version>
         <spring-boot-admin.version>3.5.0</spring-boot-admin.version>
-        <!-- Observability: Micrometer Tracing + Brave + Zipkin -->
-        <micrometer-tracing.version>1.5.0</micrometer-tracing.version>
-        <zipkin-reporter.version>3.4.4</zipkin-reporter.version>
-        <brave.version>6.0.3</brave.version>
-        <logstash-logback.version>7.4.0</logstash-logback.version>
+        <!-- Observability: structured JSON logging (version not managed by Boot BOM) -->
+        <logstash-logback.version>8.1</logstash-logback.version>
     </properties>
 
     <dependencyManagement>
@@ -148,33 +145,13 @@
             </dependency>
 
             <!-- ===== Observability: Metrics + Tracing + structured logging ===== -->
-            <!-- Micrometer Tracing facade (Spring Boot BOM also manages, pinned here for clarity) -->
-            <dependency>
-                <groupId>io.micrometer</groupId>
-                <artifactId>micrometer-tracing</artifactId>
-                <version>${micrometer-tracing.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.micrometer</groupId>
-                <artifactId>micrometer-tracing-bridge-brave</artifactId>
-                <version>${micrometer-tracing.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.micrometer</groupId>
-                <artifactId>micrometer-registry-prometheus</artifactId>
-            </dependency>
-            <!-- Zipkin reporter (Brave bridge) -->
-            <dependency>
-                <groupId>io.zipkin.reporter2</groupId>
-                <artifactId>zipkin-reporter-brave</artifactId>
-                <version>${zipkin-reporter.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.github.openfeign</groupId>
-                <artifactId>feign-brave</artifactId>
-                <version>${brave.version}</version>
-            </dependency>
-            <!-- Structured JSON logging -->
+            <!--
+                Micrometer Tracing / registry / Zipkin reporter versions are managed by the
+                Spring Boot 3.5 BOM (spring-boot-dependencies), so no <version> is pinned
+                here to stay aligned with the Boot baseline. Only the structured-logging
+                encoder (not managed by Boot BOM) is pinned below.
+            -->
+            <!-- Structured JSON logging (version not managed by Boot BOM) -->
             <dependency>
                 <groupId>net.logstash.logback</groupId>
                 <artifactId>logstash-logback-encoder</artifactId>
@@ -189,6 +166,28 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
+        </dependency>
+
+        <!-- ===== Observability shared by every module ===== -->
+        <!-- Prometheus metrics registry (exposes /actuator/prometheus) -->
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
+        </dependency>
+        <!-- Tracing facade + Brave bridge (generates traceId/spanId) -->
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-tracing-bridge-brave</artifactId>
+        </dependency>
+        <!-- Ship traces to a Zipkin backend -->
+        <dependency>
+            <groupId>io.zipkin.reporter2</groupId>
+            <artifactId>zipkin-reporter-brave</artifactId>
+        </dependency>
+        <!-- Structured JSON logging encoder (traceId/spanId via MDC) -->
+        <dependency>
+            <groupId>net.logstash.logback</groupId>
+            <artifactId>logstash-logback-encoder</artifactId>
         </dependency>
     </dependencies>
 

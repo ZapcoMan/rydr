@@ -56,6 +56,16 @@
 			<artifactId>spring-cloud-starter-openfeign</artifactId>
 		</dependency>
 
+		<!-- ActiveMQ / JMS: consume payment-deduction commands and reply with results -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-activemq</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.activemq</groupId>
+			<artifactId>activemq-pool</artifactId>
+		</dependency>
+
 		<!-- Reference custom common component: ResponseResult, BusinessInterfaceStatus, constatnt, etc. -->
 		<dependency>
 			<groupId>com.rydr</groupId>
