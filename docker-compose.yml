@@ -46,7 +46,48 @@ services:
     volumes:
       - rabbitmq-data:/var/lib/rabbitmq
 
+  # ===== Observability backend (3.5) =====
+  zipkin:
+    image: openzipkin/zipkin:3
+    ports:
+      - "9411:9411"                        # Zipkin UI + API
+    environment:
+      STORAGE_TYPE: mem                    # in-memory; use elasticsearch for production
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:v2.54.1
+    ports:
+      - "9090:9090"                        # Prometheus UI
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+    volumes:
+      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    extra_hosts:
+      - "host.docker.internal:host-gateway" # reach microservices running on the host
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:11.1.0
+    ports:
+      - "3000:3000"                        # Grafana UI (admin / admin)
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - ./docker/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./docker/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      - prometheus
+      - zipkin
+    restart: unless-stopped
+
 volumes:
   mysql-data:
   redis-data:
   rabbitmq-data:
+  prometheus-data:
+  grafana-data:
