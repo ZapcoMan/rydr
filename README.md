@@ -34,13 +34,22 @@
 
 ## 项目简介
 
-Rydr 是一套完整的在线网约车系统，用于演示企业级 **Spring Cloud 微服务架构**。平台覆盖完整的打车业务流程：
+Rydr 是一个基于 **Spring Cloud 微服务架构** 的网约车平台**教学/演示项目**，用于演示企业级微服务的构建方式与技术选型。
 
-- **乘客端**：注册、下单、实时跟踪、支付
-- **司机端**：订单监听、接单、派单、收入统计
-- **平台端**：计价引擎、短信通知、订单管理、监控
-
-> 本项目可作为使用 Spring Cloud 构建微服务应用的综合参考。
+> **重要说明（现状）**：本项目当前是**教学/演示项目，非生产就绪系统**。已实现并可运行的业务链路包括：
+> - **登录/验证码链路**：`api-passenger`/`api-driver` → `service-verification-code`（验证码生成/校验，Redis 缓存 120s）→ `service-sms`（短信下发）→ `service-passenger-user`（乘客登录建号）→ JWT 签发。
+> - **计价链路**：`api-passenger`/`api-driver` → `service-valuation`（`/forecast/single` 基于 Haversine 的预估计价；另有基于规则库 `RuleCache`/`PriceCache` 的分段计价 `ValuationService`）。
+> - **订单/派单/监听链路**：`service-order`（抢单，分布式锁）→ `service-order-dispatch`（Redis 派单）→ `api-listen-order`（SSE 流式推送司机）。
+> - **异步消息**：`service-jms-produce` → `service-jms-consumer`（ActiveMQ 队列/主题）。
+>
+> **尚未实现（桩/空壳/演示占位）**：
+> - `service-wallet`：仅启动类，**无任何钱包业务**（充值/支付/余额/流水全无）。
+> - 司机用户服务、收入统计：代码中无对应实现。
+> - `api-passenger`/`api-driver` 的 `OrderServiceImpl.forecast`：空桩（`return null`）。
+> - `service-sms` 短信发送：默认 `ConsoleSmsSender`（仅打印日志，未接真实短信服务商）。
+> - 各模块 `TestController`/`GatewayTestController`/`StudyService` 等演示接口仍保留。
+>
+> 将本项目从演示项目升级为**完全可用业务项目**的完整改造计划，见 `.codebuddy/plans/补全不完整业务-实施计划.md`。
 
 ## 架构
 
@@ -80,21 +89,21 @@ Rydr 是一套完整的在线网约车系统，用于演示企业级 **Spring Cl
 
 | 模块 | 工程名 | 端口 | 说明 |
 |--------|-------------|------|-------------|
-| 乘客 API | `api-passenger` | 9011 | 乘客端接口（订单、认证、资料） |
-| 司机 API | `api-driver` | 9002-9003 | 司机端接口（抢单、状态） |
-| 订单监听 | `api-listen-order` | 8084 | 基于 Redis 的订单事件下发 |
+| 乘客 API | `api-passenger` | 9011 | 乘客端接口（认证、短信、订单预估价） |
+| 司机 API | `api-driver` | 9002-9003 | 司机端接口（抢单、短信） |
+| 订单监听 | `api-listen-order` | 8084 | 基于 Redis 的订单派单 SSE 流式推送 |
 
 ### 服务层（业务逻辑）
 
 | 模块 | 工程名 | 端口 | 说明 |
 |--------|-------------|------|-------------|
-| 订单服务 | `service-order` | 8004-8005 | 订单生命周期与分布式锁 |
-| 派单服务 | `service-order-dispatch` | 8006 | 司机-订单匹配 |
-| 乘客服务 | `service-passenger-user` | 8012 | 注册、资料、地址 |
-| 短信服务 | `service-sms` | 8002-8003 | 短信通知下发 |
-| 计价服务 | `service-valuation` | 8060-8061 | 行程定价与费用计算 |
-| 验证码服务 | `service-verification-code` | 8011 | 登录验证码 |
-| 钱包服务 | `service-wallet` | 8006 | 余额管理 |
+| 订单服务 | `service-order` | 8004-8005 | 抢单与分布式锁（5 种锁实现，教学对比） |
+| 派单服务 | `service-order-dispatch` | 8006 | 基于 Redis 的司机-订单派单 |
+| 乘客服务 | `service-passenger-user` | 8012 | 乘客登录建号（地址/资料接口为桩） |
+| 短信服务 | `service-sms` | 8002-8003 | 短信通知下发（默认 console 桩） |
+| 计价服务 | `service-valuation` | 8060-8061 | 预估计价 + 规则库分段计价 |
+| 验证码服务 | `service-verification-code` | 8011 | 登录验证码生成/校验 |
+| 钱包服务 | `service-wallet` | 8007 | 空壳（仅启动类，无业务） |
 
 ### 基础设施层
 
@@ -223,10 +232,8 @@ cd rydr/rydr-zuul && mvn spring-boot:run
 | service-valuation | 8060, 8061 |
 | service-verification-code | 8011 |
 | service-order-dispatch | 8006 |
-| service-wallet | 8006 * |
+| service-wallet | 8007 |
 | 演示应用 | 8083 |
-
-> *`service-wallet` 与 `service-order-dispatch` 当前均使用 8006 端口，存在冲突，启动前需调整其一。
 
 ## 项目结构
 
@@ -491,14 +498,16 @@ sequenceDiagram
 - 部署生产前请复核 `management.endpoints.web.exposure` 配置
 - 完整的安全相关变量清单见 [`.env.example`](.env.example)
 
-> **代码中的已知待办项**：本项目作为教学/演示项目，部分模块仍处于脚手架状态，接入生产前需补齐。主要包括：
-> - **端口冲突**：`service-order-dispatch` 与 `service-wallet` 均使用 8006；且 `service-wallet` 注册到 `eureka-7901`（其余服务均为 `eureka-7900`），配置不一致。
-> - **码值体系混用**：`ResponseResult`（success=0/fail=1）与 `CommonStatusEnum`（SUCCESS=1/FAIL=0）两套码值并存，跨模块判定时需确认使用哪一套，否则会导致如"验证码校验/登录"链路误判失败。
-> - **`service-valuation` 地图地址未配置**：`services.map` 未在配置中提供，`requestRoute`/`requestDistance` 可能拼出 `null` 地址；且该服务开启了 Security `fullyAuthenticated`，`api-passenger` 的 Feign 调用未带认证头，存在 401 风险。
-> - **`service-order` Redis 多 RedissonClient**：存在多个 `RedissonClient` bean，按类型注入可能产生歧义。
-> - **`service-sms` 短信发送为桩实现**：`AliServiceImpl#sendMsg` 恒返回成功；模板缓存未判空且无过期机制。
-> - **`rydr-zuul`**：已迁移为 Spring Cloud Gateway，但 `RequestCheckFilter` 的签名密钥默认值（`default-secret`）与测试（`test-secret-key`）不一致，需统一。
-> - **其他**：`api-listen-order` 的监听核心逻辑仍为注释（桩实现）；`service-passenger-user#login` 无并发保护；`api-driver#TestController.admin()` 为故意演示 OOM 的接口，不应在生产暴露；部分测试类存在包名复制错误。
+> **当前状态说明**：本项目仍为**教学/演示项目**。已完成一轮缺陷修复（登录码值统一、`checkCode` 补全、短信调用贯通、`ListenService` 真实 Redis 读取 + SSE、`AliServiceImpl` 模板缓存与发送抽象、JMS 队列名统一、`rydr-common` 切面条件化、RedissonClient 注入歧义、端口冲突、熔断优雅降级、RSA 私钥外置、异常处理器、测试类包名等）。
+>
+> **仍未实现、升级为可用业务项目需补齐的核心能力**（详见改造计划）：
+> - `service-wallet`：空壳，无充值/支付/余额/流水。
+> - 司机用户服务与收入统计：不存在。
+> - `api-passenger`/`api-driver` 的 `OrderServiceImpl.forecast`：空桩。
+> - 真实短信服务商接入（当前为 console 桩）。
+> - 完整订单状态机、司机选择策略、位置上报、支付闭环、安全与可运维化。
+>
+> 完整改造计划见 `.codebuddy/plans/补全不完整业务-实施计划.md`。
 
 ## 贡献指南
 
