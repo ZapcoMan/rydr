@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.rydr.wallet.mapper.WalletRechargeMapper" >
+
+  <resultMap id="BaseResultMap" type="com.rydr.wallet.entity.WalletRecharge" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="passenger_info_id" property="passengerInfoId" jdbcType="INTEGER" />
+    <result column="out_trade_no" property="outTradeNo" jdbcType="VARCHAR" />
+    <result column="amount" property="amount" jdbcType="DECIMAL" />
+    <result column="pay_type" property="payType" jdbcType="INTEGER" />
+    <result column="status" property="status" jdbcType="INTEGER" />
+    <result column="trade_no" property="tradeNo" jdbcType="VARCHAR" />
+    <result column="paid_time" property="paidTime" jdbcType="TIMESTAMP" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    id, passenger_info_id, out_trade_no, amount, pay_type, status, trade_no, paid_time, create_time, update_time
+  </sql>
+
+  <insert id="insert" parameterType="com.rydr.wallet.entity.WalletRecharge" >
+    insert into tbl_wallet_recharge
+      (passenger_info_id, out_trade_no, amount, pay_type, status, create_time, update_time)
+    values
+      (#{passengerInfoId}, #{outTradeNo}, #{amount}, #{payType}, #{status}, #{createTime}, #{updateTime})
+  </insert>
+
+  <select id="selectByOutTradeNo" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from tbl_wallet_recharge
+    where out_trade_no = #{outTradeNo}
+    limit 1
+  </select>
+
+  <update id="updateStatus" >
+    update tbl_wallet_recharge
+    set status = #{status},
+        trade_no = #{tradeNo},
+        paid_time = now(),
+        update_time = now()
+    where out_trade_no = #{outTradeNo}
+      and status = 0
+  </update>
+
+</mapper>
