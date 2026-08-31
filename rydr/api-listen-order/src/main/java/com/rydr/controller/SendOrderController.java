@@ -19,12 +19,21 @@ public class SendOrderController {
 	@Autowired
     private RedisTemplate<String,String> redisTemplate;
 
+	/**
+	 * Demo endpoint that simulates dispatching an order to a driver.
+	 * The Redis value must be the order id, because {@code ListenService} parses it as such.
+	 */
 	@GetMapping("/send")
-	public String sendOrder(String driverId) {
+	public String sendOrder(String driverId, String orderId) {
+
+		if (driverId == null || driverId.isBlank()) {
+			return "driverId is required";
+		}
 
 		String key = RedisKeyConstant.DRIVER_LISTEN_ORDER_PRE + driverId;
-        redisTemplate.opsForValue().set(key, driverId);
+		String value = (orderId == null || orderId.isBlank()) ? driverId : orderId;
+		redisTemplate.opsForValue().set(key, value);
 
-        return "Successfully sent order to driver "+driverId;
+		return "Successfully sent order "+value+" to driver "+driverId;
 	}
 }
