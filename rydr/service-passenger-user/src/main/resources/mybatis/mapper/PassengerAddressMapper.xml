@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.rydr.dao.mapper.PassengerAddressMapper" >
+
+  <resultMap id="BaseResultMap" type="com.rydr.entity.PassengerAddress" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="passenger_info_id" property="passengerInfoId" jdbcType="INTEGER" />
+    <result column="latitude" property="latitude" jdbcType="DOUBLE" />
+    <result column="longitude" property="longitude" jdbcType="DOUBLE" />
+    <result column="address_name" property="addressName" jdbcType="VARCHAR" />
+    <result column="type" property="type" jdbcType="INTEGER" />
+    <result column="address_desc" property="addressDesc" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    id, passenger_info_id, latitude, longitude, address_name, type, address_desc, create_time, update_time
+  </sql>
+
+  <select id="selectByPassengerAndType" resultMap="BaseResultMap" parameterType="java.util.Map" >
+    select
+    <include refid="Base_Column_List" />
+    from tbl_passenger_address
+    where passenger_info_id = #{passengerInfoId}
+    <if test="type != null" >
+      and type = #{type}
+    </if>
+  </select>
+
+  <insert id="insertSelective" parameterType="com.rydr.entity.PassengerAddress" >
+    insert into tbl_passenger_address
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="passengerInfoId != null" >passenger_info_id,</if>
+      <if test="latitude != null" >latitude,</if>
+      <if test="longitude != null" >longitude,</if>
+      <if test="addressName != null" >address_name,</if>
+      <if test="type != null" >type,</if>
+      <if test="addressDesc != null" >address_desc,</if>
+      <if test="createTime != null" >create_time,</if>
+      <if test="updateTime != null" >update_time,</if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="passengerInfoId != null" >#{passengerInfoId},</if>
+      <if test="latitude != null" >#{latitude},</if>
+      <if test="longitude != null" >#{longitude},</if>
+      <if test="addressName != null" >#{addressName},</if>
+      <if test="type != null" >#{type},</if>
+      <if test="addressDesc != null" >#{addressDesc},</if>
+      <if test="createTime != null" >#{createTime},</if>
+      <if test="updateTime != null" >#{updateTime},</if>
+    </trim>
+  </insert>
+
+  <update id="updateByPrimaryKeySelective" parameterType="com.rydr.entity.PassengerAddress" >
+    update tbl_passenger_address
+    <set >
+      <if test="latitude != null" >latitude = #{latitude},</if>
+      <if test="longitude != null" >longitude = #{longitude},</if>
+      <if test="addressName != null" >address_name = #{addressName},</if>
+      <if test="type != null" >type = #{type},</if>
+      <if test="addressDesc != null" >address_desc = #{addressDesc},</if>
+      <if test="updateTime != null" >update_time = #{updateTime},</if>
+    </set>
+    where id = #{id}
+  </update>
+
+</mapper>
