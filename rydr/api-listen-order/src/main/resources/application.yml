@@ -9,13 +9,17 @@ spring:
   application:
     name: api-listen-order
   # Whether to register service with server, default true
-  cloud:    service-registry:      auto-registration:        enabled: true
+  cloud:
+    service-registry:
+      auto-registration:
+        enabled: true
 
 # Service registry
 eureka:
   client:
     enabled: true
-    healthcheck:      enabled: true
+    healthcheck:
+      enabled: true
     # Set service registry URL
     service-url:
       defaultZone: http://${EUREKA_USER:admin}:${EUREKA_PASSWORD:REQUIRED_CHANGEME}@localhost:7900/eureka/
@@ -33,12 +37,20 @@ eureka:
       user.name: ${EUREKA_USER:admin}
       user.password: ${EUREKA_PASSWORD:REQUIRED_CHANGEME}
 
-# Admin monitoring
+# Admin monitoring (observability)
 management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,info,prometheus
   endpoint:
     health:
       show-details: ALWAYS
+  # Distributed tracing: Brave -> Zipkin
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: ${ZIPKIN_ENDPOINT:http://localhost:9411}/api/v2/spans
+    discovery-client-enabled: false

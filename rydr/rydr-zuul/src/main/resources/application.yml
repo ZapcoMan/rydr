@@ -94,7 +94,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,info,prometheus,gateway
   endpoint:
     health:
       # Default is never
@@ -102,6 +102,14 @@ management:
       enabled: true
     gateway:
       enabled: true
+  # Distributed tracing: Brave -> Zipkin
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: ${ZIPKIN_ENDPOINT:http://localhost:9411}/api/v2/spans
+    discovery-client-enabled: false
 
 logging:
   level:

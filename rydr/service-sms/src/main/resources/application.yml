@@ -71,15 +71,23 @@ eureka:
       user.name: ${EUREKA_USER:admin}
       user.password: ${EUREKA_PASSWORD:REQUIRED_CHANGEME}
 
-# Admin monitoring
+# Admin monitoring (observability)
 management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,info,prometheus
   endpoint:
     health:
       show-details: ALWAYS
+  # Distributed tracing: Brave -> Zipkin
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: ${ZIPKIN_ENDPOINT:http://localhost:9411}/api/v2/spans
+    discovery-client-enabled: false
 
 logging:
   level:

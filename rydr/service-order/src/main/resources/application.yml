@@ -6,12 +6,13 @@
 spring:
   application:
     name: service-order
-  redis:
-    database: 0
-    host: ${REDIS_HOST:127.0.0.1}
-    port: ${REDIS_PORT:6379}
-    timeout: 2000
-    password: ${REDIS_PASSWORD:}
+  data:
+    redis:
+      database: 0
+      host: ${REDIS_HOST:127.0.0.1}
+      port: ${REDIS_PORT:6379}
+      timeout: 2000
+      password: ${REDIS_PASSWORD:}
     # Database connection configuration
   datasource:
     # MySQL driver class
@@ -34,6 +35,14 @@ spring:
       max-lifetime: 1800000
       # Validate database connection
       connection-test-query: SELECT 1
+  # ActiveMQ broker (reliable-message outbox for payment settlement)
+  activemq:
+    broker-url: tcp://${ACTIVEMQ_HOST:127.0.0.1}:${ACTIVEMQ_PORT:61616}
+    user: ${ACTIVEMQ_USER:admin}
+    password: ${ACTIVEMQ_PASSWORD:REQUIRED_CHANGEME}
+    pool:
+      enabled: true
+      max-connections: 50
 # Custom Redis Sentinel configuration
 sentinel:
   address:
@@ -63,6 +72,23 @@ mybatis:
   mapper-locations:
   - classpath:mybatis/mapper/*.xml
 
+# Admin monitoring (observability)
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      show-details: ALWAYS
+  # Distributed tracing: Brave -> Zipkin
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: ${ZIPKIN_ENDPOINT:http://localhost:9411}/api/v2/spans
+    discovery-client-enabled: false
 
 ---
 spring:

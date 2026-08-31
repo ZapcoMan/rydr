@@ -2,13 +2,12 @@
 spring:
   application:
     name: api-driver
-    admin:
-      enabled: true
-  redis:
-    database: 0
-    host: ${REDIS_HOST:127.0.0.1}
-    port: ${REDIS_PORT:6379}
-    timeout: 2000
+  data:
+    redis:
+      database: 0
+      host: ${REDIS_HOST:127.0.0.1}
+      port: ${REDIS_PORT:6379}
+      timeout: 2000
 
   # Distributed tracing: Sleuth/Zipkin removed in Spring Cloud 2025.x
   cloud:
@@ -35,17 +34,25 @@ eureka:
 # Ribbon configuration removed: Netflix Ribbon was replaced by Spring Cloud LoadBalancer
 # Use spring.cloud.loadbalancer.* instead
 
-# Admin monitoring
+# Admin monitoring (observability)
 management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,info,prometheus
   endpoint:
     health:
       # Default is never
       show-details: ALWAYS
       enabled: true
+  # Distributed tracing: Brave -> Zipkin
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: ${ZIPKIN_ENDPOINT:http://localhost:9411}/api/v2/spans
+    discovery-client-enabled: false
 
 logging:
   level:
