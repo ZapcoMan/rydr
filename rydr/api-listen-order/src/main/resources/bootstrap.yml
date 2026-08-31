@@ -1,6 +1,6 @@
 spring:
   application:
-    name: config-client-diy
+    name: api-listen-order
   cloud:
     config:
       discovery:

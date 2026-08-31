@@ -1,6 +1,6 @@
 spring:
   application:
-    name: config-client-diy
+    name: service-passenger-user
   cloud:
     config:
       discovery:

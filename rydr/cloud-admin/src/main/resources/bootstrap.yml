@@ -1,6 +1,6 @@
 spring:
   application:
-    name: config-client-diy
+    name: cloud-admin
   cloud:
     config:
       discovery:

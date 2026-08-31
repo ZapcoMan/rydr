@@ -1,0 +1,17 @@
+# ============================================================
+# Bootstrap context for the Eureka server itself.
+# Eureka cannot discover config-server via Eureka (chicken-and-egg),
+# so it connects directly by URI. fail-fast=false keeps Eureka
+# startable even if config-server is not up yet.
+# ============================================================
+spring:
+  application:
+    name: eureka
+  cloud:
+    config:
+      uri: http://${CONFIG_HOST:localhost}:${CONFIG_PORT:6001}
+      profile: dev
+      label: master
+      fail-fast: false
+      allow-override: true
+      override-none: true

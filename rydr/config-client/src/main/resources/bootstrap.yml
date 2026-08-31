@@ -21,6 +21,9 @@ spring:
         service-id: config-server
       profile: dev
       label: master
+      fail-fast: false
+      allow-override: true
+      override-none: true
 # Service registry - used to locate config-server
 eureka:
   client:

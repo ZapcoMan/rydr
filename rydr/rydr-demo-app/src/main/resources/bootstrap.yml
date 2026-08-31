@@ -1,6 +1,6 @@
 spring:
   application:
-    name: config-client-diy
+    name: rydr-demo-app
   cloud:
     config:
       discovery:

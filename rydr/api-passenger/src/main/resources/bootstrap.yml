@@ -1,0 +1,21 @@
+# ============================================================
+# Bootstrap context — connects to the configuration center BEFORE
+# application.yml is loaded. Uses Eureka service discovery to locate
+# config-server (service-id=config-server), so config-server must be
+# registered with Eureka first. fail-fast=false keeps the module
+# startable even without the config server (local application.yml
+# acts as the fallback).
+# ============================================================
+spring:
+  application:
+    name: api-passenger
+  cloud:
+    config:
+      discovery:
+        enabled: true
+        service-id: config-server
+      profile: dev
+      label: master
+      fail-fast: false
+      allow-override: true
+      override-none: true

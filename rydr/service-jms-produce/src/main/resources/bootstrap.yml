@@ -1,6 +1,6 @@
 spring:
   application:
-    name: config-client-diy
+    name: service-jms-provider
   cloud:
     config:
       discovery:
