@@ -46,8 +46,6 @@ feign:
   client:
     config:
       service-valuation:
-#        request-interceptors:
-#        - com.rydr.passenger.feign.interceptor.MyBasicAuthRequestInterceptor
         connect-timeout: 5000
         read-timeout: 5000
         logger-level: basic
