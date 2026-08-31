@@ -29,5 +29,9 @@ public class AuthController {
 
     }
 
-    public void logout(){}
+    public ResponseResult logout(){
+        // JWT is stateless: logout is performed client-side by discarding the token.
+        // A server-side blacklist can be added later if forced logout is required.
+        return ResponseResult.success("");
+    }
 }

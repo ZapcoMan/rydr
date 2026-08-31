@@ -4,6 +4,7 @@ import com.rydr.constant.SmsStatusEnum;
 import com.rydr.service.SmsSender;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
  * @author oi
  */
 @Service
+@ConditionalOnProperty(name = "sms.provider", havingValue = "console", matchIfMissing = true)
 @Slf4j
 public class ConsoleSmsSender implements SmsSender {
 
