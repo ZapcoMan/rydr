@@ -49,7 +49,6 @@ public class ValuationController {
         try {
             price = valuationService.calcForecastPrice(orderId);
         } catch (Exception e) {
-            e.printStackTrace();
             log.error("{}: orderId={}", ERR_CALC_FORECAST_PRICE, orderId, e);
             return ResponseResult.fail(BusinessInterfaceStatus.FAIL.getCode(), ERR_CALC_FORECAST_PRICE);
         }
@@ -68,7 +67,6 @@ public class ValuationController {
         try {
             valuationService.doneForecast(orderId);
         } catch (Exception e) {
-            e.printStackTrace();
             log.error("{}: orderId={}", ERR_DONE_FORECAST, orderId, e);
             return ResponseResult.fail(BusinessInterfaceStatus.FAIL.getCode(), ERR_DONE_FORECAST);
         }
@@ -82,7 +80,6 @@ public class ValuationController {
         try {
             detail = valuationService.requestForecastDetail(orderId);
         } catch (Exception e) {
-            e.printStackTrace();
             log.error("{}: orderId={}", ERR_DONE_FORECAST, orderId, e);
             return ResponseResult.fail(BusinessInterfaceStatus.FAIL.getCode(), ERR_DONE_FORECAST);
         }
@@ -96,7 +93,6 @@ public class ValuationController {
         try {
             result = valuationService.calcCurrentPrice(dto);
         } catch (Exception e) {
-            e.printStackTrace();
             log.error("{}: orderId={}", ERR_CALC_CURRENT_PRICE, dto.getOrderId(), e);
             return ResponseResult.fail(BusinessInterfaceStatus.FAIL.getCode(), ERR_CALC_CURRENT_PRICE);
         }
@@ -116,7 +112,6 @@ public class ValuationController {
         try {
             price = valuationService.calcSettlementPrice(orderId);
         } catch (Exception e) {
-            e.printStackTrace();
             log.error("{}: orderId={}", ERR_CALC_SETTLEMENT_PRICE, orderId, e);
             return ResponseResult.fail(BusinessInterfaceStatus.FAIL.getCode(), ERR_CALC_SETTLEMENT_PRICE);
         }

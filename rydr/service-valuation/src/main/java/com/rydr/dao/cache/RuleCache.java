@@ -39,8 +39,7 @@ public class RuleCache {
             rule = mapper.readValue(redisTemplate.opsForValue().get(key), Rule.class);
             log.info("Retrieved cache orderId={}, RuleJsonInRedis={}", orderId, key);
         } catch (Exception e) {
-            e.printStackTrace();
-            log.warn("orderId={}, Failed to parse Rule from Redis {}", orderId, key);
+            log.warn("orderId={}, Failed to parse Rule from Redis {}", orderId, key, e);
         }
 
         return rule;
@@ -58,7 +57,7 @@ public class RuleCache {
         try {
             redisTemplate.opsForValue().set(key, mapper.writeValueAsString(rule));
         } catch (JsonProcessingException e) {
-            e.printStackTrace();
+            log.error("Failed to serialize Rule to Redis, key={}", key, e);
         }
     }
 

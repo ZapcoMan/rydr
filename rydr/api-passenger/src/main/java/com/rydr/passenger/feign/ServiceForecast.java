@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import com.rydr.dto.ResponseResult;
 import com.rydr.common.dto.order.ForecastRequest;
 import com.rydr.common.dto.order.ForecastResponse;
-import com.rydr.passenger.annotation.ExcudeFeignConfig;
 
 /**
  * 

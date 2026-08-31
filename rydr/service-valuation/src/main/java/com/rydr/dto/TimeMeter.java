@@ -205,7 +205,10 @@ public class TimeMeter {
                             LocalDateTime realStart = totalSlice.getX().isAfter(currentSlice.getX()) ? totalSlice.getX() : currentSlice.getX();
                             distance = unit.requestTask.requestDistance(unit.carId, unit.cityCode, realStart, currentSlice.getY()).getDistance();
                         } catch (Exception e) {
-                            e.printStackTrace();
+                            // Distance lookup failed: fall back to 0 for this slice but
+                            // make the degradation visible instead of failing silently.
+                            log.warn("Failed to request distance for carId={}, cityCode={}",
+                                    unit.carId, unit.cityCode, e);
                         }
                         break;
                     default:

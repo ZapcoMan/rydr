@@ -71,7 +71,6 @@ public class ValuationRequestTask {
             rule = objectMapper.readValue(ruleJson, Rule.class);
             ruleCache.set(orderId, rule);
         } catch (Exception e) {
-            e.printStackTrace();
             log.error("orderId={}, Error parsing RuleJson:", orderId, e);
             throw e;
         }
@@ -107,7 +106,6 @@ public class ValuationRequestTask {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
             log.error("orderId={}, Error calling Route API: driveMeter={}", driveMeter.getOrder().getId(), driveMeter, e);
             throw e;
         }
@@ -132,7 +130,6 @@ public class ValuationRequestTask {
 
             return requestDistance(carId, cityCode, startTime, endTime);
         } catch (Exception e) {
-            e.printStackTrace();
             log.error("orderId={}, Error calling Distance API: driveMeter={}", driveMeter.getOrder().getId(), driveMeter, e);
             throw e;
         }
@@ -184,7 +181,6 @@ public class ValuationRequestTask {
                 result.setDistance(result.getDistance() + distance.getDistance());
             }
         } catch (Exception e) {
-            e.printStackTrace();
             log.error("Error calling Route Distance API: carId={}, cityCode={}, startTime={}, endTime={}", carId, cityCode, startTime, endTime, e);
             throw e;
         }

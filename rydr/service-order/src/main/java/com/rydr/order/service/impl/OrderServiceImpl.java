@@ -153,12 +153,20 @@ public class OrderServiceImpl implements OrderService {
 		BigDecimal amount = orderAmount(order);
 		String bizKey = "PAY_" + orderId;
 
-		// Idempotency: if a command for this order is already in flight, do not enqueue twice.
-		if (txMessageMapper.selectByBizKey(bizKey) != null) {
-			result.put("success", false);
-			result.put("code", BusinessInterfaceStatus.FAIL.getCode());
-			result.put("message", "Payment command already in flight for order " + orderId);
-			return result;
+		// Idempotency: reject while a command is still in flight, but allow a fresh
+		// attempt once the previous one reached a terminal state (DONE / ABANDONED).
+		TxMessage existing = txMessageMapper.selectByBizKey(bizKey);
+		if (existing != null) {
+			int st = existing.getStatus() == null ? TxMessage.STATUS_INIT : existing.getStatus();
+			if (st != TxMessage.STATUS_DONE && st != TxMessage.STATUS_ABANDONED) {
+				result.put("success", false);
+				result.put("code", BusinessInterfaceStatus.FAIL.getCode());
+				result.put("message", "Payment command already in flight for order " + orderId);
+				return result;
+			}
+			// Terminal (paid / business-failed): clear the stale row so the passenger
+			// can pay again (e.g. after topping up an insufficient balance).
+			txMessageMapper.deleteByBizKey(bizKey);
 		}
 
 		TxMessage msg = new TxMessage();
@@ -203,7 +211,10 @@ public class OrderServiceImpl implements OrderService {
 	/**
 	 * Called by the wallet-result consumer when the wallet service confirms a payment.
 	 * Marks the order paid and the outbox message DONE.
+	 *
+	 * <p>Two writes (order status + outbox row) must be atomic, hence the transaction.
 	 */
+	@Transactional
 	public void onPaySuccess(int orderId, int payType, String bizKey) {
 		Map<String, Object> params = new HashMap<>();
 		params.put("id", orderId);
@@ -224,7 +235,11 @@ public class OrderServiceImpl implements OrderService {
 	/**
 	 * Called by the wallet-result consumer when the wallet deduction failed.
 	 * Rolls the order status back so the passenger can retry.
+	 *
+	 * <p>The outbox row is kept (marked FAIL) instead of being physically deleted, so
+	 * the failed attempt remains auditable and can be inspected / re-driven manually.
 	 */
+	@Transactional
 	public void onPayFailure(int orderId, String reason, String bizKey) {
 		Order order = mapper.selectByPrimaryKey(orderId);
 		if (order != null && order.getStatus() != null
@@ -233,7 +248,13 @@ public class OrderServiceImpl implements OrderService {
 			mapper.updateByPrimaryKeySelective(order);
 		}
 		if (bizKey != null) {
-			txMessageMapper.deleteByBizKey(bizKey);
+			TxMessage row = txMessageMapper.selectByBizKey(bizKey);
+			if (row != null) {
+				// Terminal business failure: kept for audit, never auto-retried
+				// (retrying an insufficient-balance payment would tight-loop).
+				txMessageMapper.updateStatus(row.getId(), TxMessage.STATUS_ABANDONED,
+						row.getRetry() == null ? 1 : row.getRetry(), null);
+			}
 		}
 		log.warn("Order {} payment failed, status rolled back: {}", orderId, reason);
 	}

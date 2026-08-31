@@ -4,11 +4,14 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Arrays;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * Price calculation helper class
  *
  * @date 2018/10/29
  */
+@Slf4j
 public class PriceHelper {
 
     /**
@@ -23,7 +26,7 @@ public class PriceHelper {
         try {
             result = resetScale(Arrays.stream(value).reduce(a, BigDecimal::add));
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Price calculation failed", e);
         }
         return result;
     }
@@ -40,7 +43,7 @@ public class PriceHelper {
         try {
             result = resetScale(Arrays.stream(value).reduce(a, BigDecimal::subtract).max(BigDecimal.ZERO));
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Price calculation failed", e);
         }
         return result;
     }
@@ -68,7 +71,7 @@ public class PriceHelper {
         try {
             result = resetScale(a.multiply(BigDecimal.valueOf(b)));
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Price calculation failed", e);
         }
         return result;
     }
@@ -95,7 +98,7 @@ public class PriceHelper {
         try {
             result = value.setScale(2, RoundingMode.DOWN);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Price calculation failed", e);
         }
         return result;
     }

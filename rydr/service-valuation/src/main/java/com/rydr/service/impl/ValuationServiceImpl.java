@@ -83,7 +83,7 @@ public class ValuationServiceImpl implements ValuationService {
         // Cache result
         priceCache.set(orderId, priceMeter, 1, TimeUnit.HOURS);
 
-        //TODO
+        // Persist / finalize the forecast result for this order.
         doneForecast(orderId);
 
         // Return price

@@ -42,8 +42,7 @@ public class PriceCache {
             priceMeter = mapper.readValue(redisTemplate.opsForValue().get(key), PriceMeter.class);
             log.info("Retrieved cache orderId={}, PriceMeterInRedis={}", orderId, key);
         } catch (Exception e) {
-            e.printStackTrace();
-            log.warn("orderId={}, Failed to parse PriceMeter from Redis {}", orderId, key);
+            log.warn("orderId={}, Failed to parse PriceMeter from Redis {}", orderId, key, e);
         }
 
         return priceMeter;
@@ -63,7 +62,7 @@ public class PriceCache {
         try {
             redisTemplate.opsForValue().set(key, mapper.writeValueAsString(priceMeter), timeout, unit);
         } catch (JsonProcessingException e) {
-            e.printStackTrace();
+            log.error("Failed to serialize PriceMeter to Redis, key={}", key, e);
         }
     }
 
